@@ -7,9 +7,11 @@ Ce fichier sert de mémoire persistante pour les sessions de développement.
 ## Session 1 - 17 Novembre 2025
 
 ### Objectif
+
 Optimisation de la structure de la base de données et préparation du projet pour un développement structuré sur 2 semaines.
 
 ### État Initial
+
 - Structure projet définie dans [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)
 - Laravel 12.33.0 installé avec packages (Sanctum, DomPDF, Excel, Intervention Image, Spatie Permissions)
 - Base de données non encore migrée
@@ -17,6 +19,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 - Frontend React non encore démarré
 
 ### Travail Effectué
+
 - [x] Analyse de la structure BDD existante
 - [x] Création du document [DATABASE_OPTIMIZATION.md](DATABASE_OPTIMIZATION.md)
 - [x] Identification de 7 nouvelles tables nécessaires
@@ -29,6 +32,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 ### Décisions Prises
 
 #### 1. Structure de Base de Données
+
 - **7 nouvelles tables ajoutées:**
   - `lease_cotenants` - Gestion co-locataires
   - `lease_guarantors` - Informations garants
@@ -42,6 +46,7 @@ Optimisation de la structure de la base de données et préparation du projet po
   - `charges` → `utilities` (plus explicite pour les consommations)
 
 #### 2. Optimisations Majeures
+
 - **Soft deletes** (`deleted_at`) sur toutes les tables principales
 - **Références uniques** pour traçabilité (properties: REF-2024-001, leases: BAIL-2024-001)
 - **Géolocalisation** (latitude/longitude) pour les biens
@@ -51,6 +56,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 - **Index optimisés** sur toutes les tables pour performance
 
 #### 3. Conformité Légale
+
 - Gestion révisions loyer selon IRL (Indice de Référence des Loyers)
 - Délais de préavis (locataire/propriétaire)
 - États des lieux complets (entrée/sortie)
@@ -58,6 +64,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 - Numéros de cadastre
 
 #### 4. Planning de Développement
+
 - **Semaine 1:** Foundation (Auth, Dashboard, Properties, Tenants, Baux partie 1)
 - **Semaine 2:** Advanced (Baux partie 2, Finances, Documents, États des lieux, Polish)
 - **2 développeurs:** Un sur Backend (Laravel), un sur Frontend (React)
@@ -67,6 +74,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 ### Code Modifié
 
 #### Migrations Créées (18 fichiers)
+
 1. `2024_01_01_000001_update_users_table.php` - Ajout 12 champs (phone, company, locale, etc.)
 2. `2024_01_01_000002_create_properties_table.php` - 38 champs avec DPE, géoloc, équipements JSON
 3. `2024_01_01_000003_create_property_photos_table.php` - Gestion complète photos
@@ -87,11 +95,13 @@ Optimisation de la structure de la base de données et préparation du projet po
 18. `2024_01_01_000018_create_subscriptions_table.php` - Optimisée
 
 #### Documents Créés
+
 - [docs/CONVERSATION_LOG.md](CONVERSATION_LOG.md) - Ce fichier
 - [docs/DATABASE_OPTIMIZATION.md](DATABASE_OPTIMIZATION.md) - Documentation complète BDD (17 tables détaillées)
 - [docs/DEVELOPMENT_PLAN_2_WEEKS.md](DEVELOPMENT_PLAN_2_WEEKS.md) - Planning jour par jour (10 jours)
 
 ### Statistiques
+
 - **Total tables:** 17 (10 initiales + 7 nouvelles)
 - **Champs ajoutés:** ~150+ nouveaux champs
 - **Index créés:** ~45 index pour optimisation
@@ -101,7 +111,9 @@ Optimisation de la structure de la base de données et préparation du projet po
 ### Points à Retenir pour la Prochaine Session
 
 #### À Faire Immédiatement (Jour 1)
+
 **Backend Developer:**
+
 1. Créer tous les Models avec relations (Property, Tenant, Lease, etc.)
 2. Configurer Laravel Sanctum
 3. Créer AuthController complet
@@ -109,6 +121,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 5. Tester API Auth avec Postman
 
 **Frontend Developer:**
+
 1. Setup React et vérifier packages
 2. Configurer Axios client
 3. Créer Store Zustand Auth
@@ -116,6 +129,7 @@ Optimisation de la structure de la base de données et préparation du projet po
 5. Créer pages Login/Register
 
 #### Commandes de Démarrage
+
 ```bash
 # Backend
 cd backend
@@ -129,11 +143,13 @@ npm run dev
 ```
 
 #### Fichiers Importants à Consulter
+
 1. [DATABASE_OPTIMIZATION.md](DATABASE_OPTIMIZATION.md) - Comprendre structure BDD
 2. [DEVELOPMENT_PLAN_2_WEEKS.md](DEVELOPMENT_PLAN_2_WEEKS.md) - Planning détaillé
 3. [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md) - Architecture globale
 
 #### Points d'Attention
+
 - Respect du planning jour par jour
 - Daily standup à 9h00
 - Code review obligatoire avant merge
@@ -141,11 +157,167 @@ npm run dev
 - Documentation au fur et à mesure
 
 ### Prochaines Étapes (Session 2)
-- [ ] Créer les Models Laravel avec relations
+
+- [x] Créer les Models Laravel avec relations
 - [ ] Implémenter l'authentification complète
 - [ ] Setup Frontend React
 - [ ] Créer composants UI de base
 - [ ] Première synchronisation Backend/Frontend
+
+---
+
+## Session 2 - 19 Novembre 2025
+
+### Objectif
+
+Créer tous les modèles Laravel avec leurs relations Eloquent pour le projet Locagest Pro (Jour 1 - Tâche 2 du plan de développement).
+
+### État de Départ
+
+- ✅ Base de données migrée avec 18 migrations
+- ✅ Structure de la base de données optimisée
+- ✅ Documentation complète (DATABASE_OPTIMIZATION.md, DEVELOPMENT_PLAN_2_WEEKS.md)
+- ⏳ Seul le modèle User existait (version basique de Laravel)
+
+### Travail Effectué
+
+- [x] Mise à jour du modèle User avec toutes les relations et champs additionnels
+- [x] Création de 17 modèles Laravel avec relations complètes
+- [x] Documentation complète des modèles et relations (MODELS_RELATIONS.md)
+
+#### Modèles Créés (17 modèles)
+
+1. **User** (mis à jour) - Utilisateur/Propriétaire avec Sanctum et SoftDeletes
+2. **Property** - Bien immobilier avec géolocalisation et DPE
+3. **PropertyPhoto** - Photos des biens
+4. **Tenant** - Locataire avec calcul de solvabilité
+5. **Lease** - Bail avec indexation IRL
+6. **LeaseCotenant** - Co-locataires
+7. **LeaseGuarantor** - Garants (physique ou moral)
+8. **Rent** - Loyers avec gestion des paiements
+9. **RentPayment** - Paiements de loyers
+10. **RentRevision** - Historique révisions de loyer IRL
+11. **Utility** - Charges et consommations
+12. **Expense** - Dépenses avec TVA et déductibilité
+13. **Document** - Documents polymorphiques avec versioning
+14. **PropertyInventory** - États des lieux
+15. **InventoryItem** - Items d'états des lieux
+16. **Notification** - Notifications in-app
+17. **Plan** - Plans d'abonnement
+18. **Subscription** - Souscriptions utilisateurs
+
+### Décisions Prises
+
+#### 1. Architecture des Relations
+
+**Relations principales implémentées :**
+- `User` → Properties, Tenants, Expenses, Subscription (1-N et 1-1)
+- `Property` → Photos, Leases, Expenses, Documents (1-N et polymorphic)
+- `Lease` → Property, Tenant, Cotenants, Guarantors, Rents, Documents (1-1, 1-N, polymorphic)
+- `Rent` → Payments (1-N)
+- `Document` → Polymorphic (peut appartenir à Property, Tenant, Lease, etc.)
+
+**Raison :** Assure la cohérence des données et facilite les requêtes avec Eloquent
+
+#### 2. Traits Utilisés
+
+**SoftDeletes sur 6 modèles :**
+- User, Property, Tenant, Lease, Expense, Document
+
+**Raison :** Conservation de l'historique et possibilité de restauration
+
+**HasApiTokens (Sanctum) sur User**
+
+**Raison :** Authentification API sécurisée pour le frontend React
+
+#### 3. Méthodes Utilitaires
+
+**Ajout de méthodes helper dans chaque modèle :**
+- Accesseurs : `getFullNameAttribute()`, `getTotalMonthlyCostAttribute()`
+- Méthodes de vérification : `isAvailable()`, `isPaid()`, `isExpired()`
+- Scopes : `scopeActive()`, `scopeUnread()`
+
+**Raison :** Améliore la lisibilité du code et réduit la duplication
+
+#### 4. Relations Polymorphiques
+
+**Document utilise morphTo :**
+```php
+morphTo('documentable')  // Peut appartenir à Property, Tenant, Lease, etc.
+```
+
+**Raison :** Flexibilité maximale pour attacher des documents à n'importe quelle entité
+
+#### 5. Casts de Type
+
+**Tous les modèles utilisent la méthode `casts()` :**
+- Dates : 'date' ou 'datetime'
+- Booléens : 'boolean'
+- Décimaux : 'decimal:2'
+- Arrays : 'array' (pour JSON)
+
+**Raison :** Type safety et conversion automatique
+
+### Code Créé
+
+#### Fichiers Créés (18 fichiers)
+
+**Modèles :**
+1. `backend/app/Models/User.php` (mis à jour)
+2. `backend/app/Models/Property.php`
+3. `backend/app/Models/PropertyPhoto.php`
+4. `backend/app/Models/Tenant.php`
+5. `backend/app/Models/Lease.php`
+6. `backend/app/Models/LeaseCotenant.php`
+7. `backend/app/Models/LeaseGuarantor.php`
+8. `backend/app/Models/Rent.php`
+9. `backend/app/Models/RentPayment.php`
+10. `backend/app/Models/RentRevision.php`
+11. `backend/app/Models/Utility.php`
+12. `backend/app/Models/Expense.php`
+13. `backend/app/Models/Document.php`
+14. `backend/app/Models/PropertyInventory.php`
+15. `backend/app/Models/InventoryItem.php`
+16. `backend/app/Models/Notification.php`
+17. `backend/app/Models/Plan.php`
+18. `backend/app/Models/Subscription.php`
+
+**Documentation :**
+- `docs/MODELS_RELATIONS.md` - Documentation complète de tous les modèles (18 modèles détaillés)
+
+### Statistiques
+
+- **Modèles créés :** 17 nouveaux + 1 mis à jour = 18 total
+- **Lignes de code :** ~1800 lignes
+- **Relations Eloquent :** 66 relations totales
+- **Méthodes utilitaires :** 28 méthodes helper
+- **Traits utilisés :** HasFactory, SoftDeletes, HasApiTokens, Notifiable
+
+### Points à Retenir pour la Prochaine Session
+
+#### À Faire Immédiatement (Jour 1 - Suite)
+
+**Backend Developer (tâches restantes du Jour 1) :**
+
+1. ✅ Créer tous les Models avec relations (FAIT)
+2. ⏳ Configurer Laravel Sanctum (1h)
+3. ⏳ Créer AuthController complet (2h)
+4. ⏳ Créer Form Requests pour validation (1h)
+5. ⏳ Tester API Auth avec Postman (1h)
+
+### Prochaines Étapes (Session 3)
+
+**Priorité 1 - Backend (Jour 1 fin) :**
+- [ ] Configurer Laravel Sanctum pour l'authentification API
+- [ ] Créer AuthController (register, login, logout, me, updateProfile)
+- [ ] Créer Form Requests pour validation Auth
+- [ ] Configurer les routes API dans `routes/api.php`
+- [ ] Tester les endpoints avec Postman/Insomnia
+
+**Priorité 2 - Backend (Jour 2) :**
+- [ ] Créer DashboardController avec statistiques
+- [ ] Créer Seeders (PlanSeeder, UserSeeder, PropertySeeder, TenantSeeder)
+- [ ] Créer PropertyController (CRUD de base)
 
 ---
 
