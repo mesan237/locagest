@@ -305,6 +305,20 @@ morphTo('documentable')  // Peut appartenir à Property, Tenant, Lease, etc.
 4. ⏳ Créer Form Requests pour validation (1h)
 5. ⏳ Tester API Auth avec Postman (1h)
 
+### Git Commit & Push
+
+**Commit créé :**
+- Hash: `c27133b`
+- Message: `feat: create all Laravel models with Eloquent relations`
+- Fichiers: 24 fichiers modifiés
+- Insertions: +4764 lignes
+- Suppressions: -830 lignes
+
+**Push réussi sur GitHub :**
+- Branche: `dev`
+- Remote: `origin`
+- URL PR suggérée: https://github.com/mesan237/locagest/pull/new/dev
+
 ### Prochaines Étapes (Session 3)
 
 **Priorité 1 - Backend (Jour 1 fin) :**
