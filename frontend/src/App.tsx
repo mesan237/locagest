@@ -1,6 +1,8 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
+
+// Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
 // Define the router context type
