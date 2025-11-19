@@ -42,7 +42,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"+33612345678\",\n  \"company_name\": \"Ma Société\",\n  \"is_company\": false\n}"
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"+33612345678\",\n  \"company_name\": \"Ma Société\",\n  \"company_siret\": \"12345678901234\",\n  \"is_company\": false\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",

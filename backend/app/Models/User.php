@@ -25,7 +25,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'company_name',
-        'siret',
+        'company_siret',
         'address',
         'city',
         'postal_code',
