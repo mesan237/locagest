@@ -1124,6 +1124,186 @@ Implémenter la partie frontend complète : composants UI, authentification, rou
 
 ---
 
+## Session 7 - 19 Novembre 2025 (Fix Router & Auth)
+
+### Objectif
+
+Résoudre l'erreur "Duplicate routes" et fixer le problème de déconnexion.
+
+### État de Départ
+
+- ✅ Frontend complet développé (Session 6)
+- ❌ Erreur "Duplicate routes found with id: __root__"
+- ❌ Page blanche au chargement
+- ❌ Bouton déconnexion ne fonctionne pas
+
+### Travail Effectué
+
+#### Partie 1 : Fix Erreur Router "Duplicate routes"
+
+**Problème identifié :**
+- Fichier `routeTree.gen.ts` créé manuellement en conflit avec la génération auto
+- TanStack Router essayait de générer le même fichier automatiquement
+- Résultat : doublon de la route `__root__`
+
+**Solution implémentée :**
+1. ✅ Installation de `@tanstack/router-plugin` (41 packages)
+2. ✅ Configuration du plugin dans `vite.config.ts`
+3. ✅ Suppression du fichier `routeTree.gen.ts` manuel
+4. ✅ Ajout de `src/routeTree.gen.ts` au `.gitignore`
+5. ✅ Ajout de `.tanstack/` au `.gitignore`
+6. ✅ Le fichier est maintenant généré automatiquement à chaque démarrage
+
+**Fichiers modifiés :**
+- `frontend/vite.config.ts` - Ajout du plugin TanStackRouterVite
+- `frontend/.gitignore` - Ajout des fichiers générés
+- `frontend/src/App.tsx` - Import du routeTree généré
+- `frontend/package.json` - Nouvelle dépendance
+
+#### Partie 2 : Fix CORS pour Multiples Ports
+
+**Problème identifié :**
+- Frontend tourne sur port 5175 (5173 et 5174 déjà occupés)
+- Backend CORS n'autorisait que ports 3000 et 5173
+- Résultat : Network Error lors de l'inscription
+
+**Solution :**
+Ajout des ports 5174 et 5175 dans `backend/config/cors.php`:
+```php
+'allowed_origins' => [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',  // Nouveau
+    'http://localhost:5175',  // Nouveau
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',  // Nouveau
+    'http://127.0.0.1:5175',  // Nouveau
+],
+```
+
+#### Partie 3 : Fix Déconnexion
+
+**Problème identifié :**
+- Bouton déconnexion ne fonctionnait pas
+- Si l'API échoue, `onSuccess` n'est jamais appelé
+- L'utilisateur restait connecté même après clic
+
+**Solution :**
+Ajout de `onError` aux mutations `logout` et `logoutAll` dans `useAuth.ts`:
+```typescript
+const logoutMutation = useMutation({
+  mutationFn: () => authService.logout(),
+  onSuccess: () => {
+    logoutStore();
+    queryClient.clear();
+    navigate({ to: '/login' });
+  },
+  onError: () => {
+    // Even if the API call fails, logout the user locally
+    logoutStore();
+    queryClient.clear();
+    navigate({ to: '/login' });
+  },
+});
+```
+
+**Avantage :** L'utilisateur est déconnecté localement même si le backend ne répond pas.
+
+### Code Modifié
+
+#### Configuration (4 fichiers)
+1. `frontend/vite.config.ts` - Plugin TanStack Router
+2. `frontend/.gitignore` - Exclusion fichiers générés
+3. `backend/config/cors.php` - Ports 5174-5175
+4. `frontend/src/hooks/useAuth.ts` - Gestion erreurs logout
+
+### Git Commits & Push
+
+**Commit 1 - Fix Router & CORS:**
+- Hash: `05f56d3`
+- Message: `fix: configure TanStack Router plugin and fix CORS for multiple ports`
+- Fichiers: 7 modifiés (+693, -88)
+- Changements:
+  - Installation @tanstack/router-plugin
+  - Configuration Vite plugin
+  - Suppression routeTree.gen.ts manuel
+  - CORS pour ports 5173-5175
+
+**Commit 2 - Fix Logout:**
+- Hash: `a99bd22`
+- Message: `fix: add error handling for logout mutations`
+- Fichiers: 1 modifié (+12)
+- Changements:
+  - onError callbacks pour logout/logoutAll
+  - Déconnexion locale même si API échoue
+
+**Push réussi sur GitHub:**
+- Branche: `dev`
+- Remote: `origin`
+- Commits: 05f56d3, a99bd22
+
+### Tests Effectués
+
+✅ **Router :**
+- Page se charge correctement
+- Routes fonctionnent (/, /login, /register, /dashboard)
+- Pas d'erreur "Duplicate routes"
+
+✅ **CORS :**
+- Frontend communique avec backend
+- Inscription fonctionne (avec backend actif)
+
+✅ **Déconnexion :**
+- Bouton logout fonctionne
+- Redirection vers /login
+- État local nettoyé
+
+### Points d'Attention
+
+**Configuration complète pour tester :**
+1. Backend Laravel actif : `php artisan serve` (port 8000)
+2. Frontend Vite actif : `npm run dev` (port 5175)
+3. Fichier `.env` frontend avec `VITE_API_URL=http://localhost:8000/api`
+
+**Pages placeholder à créer (optionnel) :**
+- `/terms` - Conditions d'utilisation
+- `/privacy` - Politique de confidentialité
+- `/forgot-password` - Mot de passe oublié
+
+### Statistiques Session 7
+
+- **Packages installés :** 1 (@tanstack/router-plugin + 41 dépendances)
+- **Fichiers modifiés :** 8
+- **Lignes ajoutées :** +705
+- **Lignes supprimées :** -88
+- **Commits :** 2
+- **Bugs fixés :** 3 (Router, CORS, Logout)
+
+### Résumé Problèmes Résolus
+
+| Problème | Cause | Solution | Status |
+|----------|-------|----------|--------|
+| Duplicate routes | routeTree.gen.ts manuel | Plugin auto-génération | ✅ Résolu |
+| Network Error | CORS ports manquants | Ajout ports 5174-5175 | ✅ Résolu |
+| Logout non fonctionnel | Pas de gestion d'erreur | onError callbacks | ✅ Résolu |
+
+### Prochaines Étapes
+
+**Frontend Jour 2 :**
+- [ ] Créer pages Terms & Privacy (optionnel)
+- [ ] Tester inscription/connexion complète
+- [ ] Créer composants Properties
+- [ ] Implémenter CRUD Properties
+
+**Backend Jour 2 :**
+- [ ] DashboardController avec stats
+- [ ] Seeders (Plan, User, Property, Tenant)
+- [ ] PropertyController CRUD
+- [ ] Upload de photos
+
+---
+
 ## Session 5 - 19 Novembre 2025 (Tests API)
 
 ### Objectif
