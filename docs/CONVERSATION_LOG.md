@@ -599,17 +599,181 @@ php artisan serve
 4. Update Profile (teste la mise à jour)
 5. Logout (révoque le token)
 
-### Statistiques
+### Décisions Prises - Partie 3: Vérification Complète des Migrations
 
+#### 1. Problème Majeur Identifié: Incohérence Migrations vs Modèles
+
+**Problème découvert :**
+- Les migrations utilisent `user_id` comme clé étrangère
+- Les modèles utilisaient `owner_id` comme clé étrangère
+- 80+ champs avaient des noms différents entre migrations et modèles
+
+**Impact :** CRITIQUE - Les modèles ne fonctionneraient pas avec la base de données
+
+**Décision :** Corriger TOUS les modèles pour correspondre aux migrations (source de vérité)
+
+**Raison :** Les migrations définissent la structure réelle de la base de données. Les modèles doivent correspondre exactement.
+
+#### 2. Modèles Corrigés (11 sur 18)
+
+**Property Model :**
+- `owner_id` → `user_id`
+- Supprimé: `current_value`, `tax_value`, `dpe_rating`, `dpe_value`, `ges_value`, `heating_type`, `has_cellar`, `availability_date`
+- Ajouté: `energy_rating`, `is_furnished`, `estimated_value`
+- Correction relation `owner()` pour utiliser `user_id`
+
+**Tenant Model :**
+- `owner_id` → `user_id`
+- `mobile` → `phone_secondary`
+- `date_of_birth` → `birth_date`
+- `place_of_birth` → `birth_place`
+- `id_card_expiry` → `id_card_expiry_date`
+- Supprimé: `previous_address`, `status`
+- Ajouté: `is_active`
+
+**Lease Model :**
+- `payment_day` → `rent_payment_day`
+- `payment_method` → `rent_payment_method`
+- Supprimé: `indexation_type`, `irl_base_quarter`, `irl_base_year`, `irl_base_value`, `last_revision_date`, `notice_period_owner`, `auto_renew`, `special_clauses`, `signed_at`, `terminated_at`
+- Ajouté: `charges_type`, `deposit_paid_date`, `deposit_returned_date`, `deposit_returned_amount`, `indexation_reference`, `indexation_base_value`, `indexation_date`, `last_indexation_date`, `notice_period_landlord`, `signed_date`, `termination_date`, `notes`
+
+**Rent Model :**
+- `amount` → `rent_amount`
+- `charges` → `charges_amount`
+- Supprimé: `balance`, `payment_method`
+- Ajouté: `other_amount`, `is_auto_generated`
+
+**RentPayment Model :**
+- Ajouté trait `SoftDeletes`
+- `transaction_id` → `transaction_reference`
+- Ajouté: `bank_name`, `receipt_generated_at`
+
+**RentRevision Model :**
+- Supprimé: `irl_quarter`, `irl_year`, `old_irl_value`, `new_irl_value`, `applied_by`
+- Ajouté: `indexation_reference`, `base_index`, `new_index`, `applied_from`
+
+**Utility Model :**
+- Supprimé: `included_in_charges`, `provider`, `meter_reading_start`, `meter_reading_end`, `notes`
+- Ajouté: `previous_meter_reading`, `current_meter_reading`, `invoice_reference`, `invoice_date`, `paid_by_tenant`
+
+**Expense Model :**
+- `owner_id` → `user_id`
+- `supplier` → `supplier_name`
+- Supprimé: `vat_rate`, `deductible_percentage`
+- Ajouté: `subcategory`, `payment_date`, `receipt_path`, `is_recoverable`, `recovered_amount`
+
+**Document Model :**
+- Ajouté: `user_id`
+- Supprimé: `description`, `signed_by`, `uploaded_by`
+- Ajouté: `category`, `is_archived`
+- `signed_at` → `signed_date`
+- `expires_at` → `expiry_date`
+
+**PropertyPhoto Model :**
+- `order` → `display_order`
+- Ajouté: `width`, `height`
+
+#### 3. Documentation Complète Créée
+
+**MIGRATION_CHECK.md :**
+- Liste complète de tous les changements
+- Comparaison avant/après pour chaque modèle
+- Instructions pour recréer la base de données
+- Checklist de vérification
+
+**Raison :** Assurer la traçabilité et faciliter le débogage futur
+
+### Code Modifié - Partie 3
+
+#### Modèles Modifiés (11 fichiers)
+
+1. `backend/app/Models/Property.php` - 36 champs corrigés
+2. `backend/app/Models/Tenant.php` - 8 champs corrigés
+3. `backend/app/Models/Lease.php` - 27 champs corrigés
+4. `backend/app/Models/Rent.php` - 5 champs corrigés
+5. `backend/app/Models/RentPayment.php` - 3 champs + trait SoftDeletes
+6. `backend/app/Models/RentRevision.php` - 5 champs corrigés
+7. `backend/app/Models/Utility.php` - 9 champs corrigés
+8. `backend/app/Models/Expense.php` - 8 champs corrigés
+9. `backend/app/Models/Document.php` - 7 champs corrigés
+10. `backend/app/Models/PropertyPhoto.php` - 3 champs corrigés
+
+#### Migration Modifiée
+
+11. `backend/database/migrations/2024_01_01_000001_update_users_table.php`
+    - Ajouté champ `is_company` manquant dans up()
+    - Ajouté index sur `is_company`
+
+#### Documentation Créée
+
+12. `MIGRATION_CHECK.md` - Documentation complète de vérification (300+ lignes)
+    - Liste de tous les modèles corrigés
+    - Détail de chaque correction
+    - Instructions pour recréer la BDD
+    - Checklist post-corrections
+
+### Statistiques - Session 4 Complète
+
+**Partie 1 - Outils de Test :**
 - **Guides créés :** 3 fichiers
 - **Total lignes documentation :** ~800 lignes
 - **Requêtes Postman :** 8 endpoints
 - **Scripts Postman :** 2 (auto-save token)
-- **Temps estimé pour tests :** 5-10 minutes
+
+**Partie 2 - Corrections Erreurs :**
+- **Fichiers .env corrigés :** 1
+- **Modèles corrigés (siret):** 4
+- **Form Requests corrigés :** 2
+- **Collection Postman corrigée :** 1
+- **Migrations corrigées :** 1
+
+**Partie 3 - Vérification Migrations :**
+- **Migrations vérifiées :** 18/18
+- **Modèles corrigés :** 11
+- **Champs corrigés :** 80+
+- **Relations corrigées :** 8
+- **Total lignes code modifiées :** 574 insertions, 130 suppressions
+
+### Git Commit & Push
+
+**Commit créé :**
+- Hash: `ea3947d`
+- Message: `fix: align all models with migrations and fix field mismatches`
+- Fichiers modifiés: 14 fichiers
+- Insertions: +574 lignes
+- Suppressions: -130 lignes
+
+**Détails du commit :**
+- 11 modèles corrigés (Property, Tenant, Lease, Rent, RentPayment, RentRevision, Utility, Expense, Document, PropertyPhoto)
+- 1 migration corrigée (update_users_table.php)
+- 1 migration Sanctum ajoutée (personal_access_tokens)
+- 1 documentation créée (MIGRATION_CHECK.md)
+
+**Push réussi sur GitHub :**
+- Branche: `dev`
+- Remote: `origin`
+- Commit précédent: `afe00ad` (fix siret → company_siret)
+- Nouveau commit: `ea3947d` (fix migrations alignment)
+
+### Points d'Attention
+
+**⚠️ ACTION REQUISE AVANT DE TESTER L'API :**
+
+La base de données doit être recréée car les modèles ont été significativement modifiés :
+
+```bash
+cd backend
+php artisan migrate:fresh
+```
+
+**Pourquoi ?**
+- Changement de `owner_id` vers `user_id` dans plusieurs tables
+- 80+ champs renommés ou ajoutés
+- La structure actuelle de la BDD ne correspond plus aux modèles
 
 ### Résumé Jour 1 - COMPLET ✅
 
-**Toutes les tâches du Jour 1 terminées :**
+**Toutes les tâches du Jour 1 terminées + Corrections critiques :**
 
 | Tâche | Status | Temps |
 |-------|--------|-------|
@@ -621,8 +785,10 @@ php artisan serve
 | ✅ Routes API | Complété | 30min |
 | ✅ Documentation API | Complété | 1h |
 | ✅ Outils de test | Complété | 1h |
+| ✅ Corrections erreurs (.env, siret, is_company) | Complété | 30min |
+| ✅ Vérification + correction migrations | Complété | 2h |
 
-**Total Jour 1 : 100% complété ! 🎉**
+**Total Jour 1 : 100% complété + corrections ! 🎉**
 
 ### Prochaines Étapes (Jour 2)
 

@@ -4,6 +4,20 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  email_verified_at?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+  company_name?: string;
+  company_siret?: string;
+  is_company: boolean;
+  avatar_path?: string;
+  timezone?: string;
+  language?: string;
+  notification_preferences?: Record<string, any>;
+  last_login_at?: string;
   created_at: string;
   updated_at: string;
 }
