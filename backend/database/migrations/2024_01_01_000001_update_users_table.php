@@ -12,7 +12,8 @@ return new class extends Migration
             $table->string('phone', 20)->nullable()->after('email');
             $table->string('company_name')->nullable()->after('phone');
             $table->string('company_siret', 14)->nullable()->after('company_name');
-            $table->string('address')->nullable()->after('company_siret');
+            $table->boolean('is_company')->default(false)->after('company_siret');
+            $table->string('address')->nullable()->after('is_company');
             $table->string('city', 100)->nullable()->after('address');
             $table->string('postal_code', 10)->nullable()->after('city');
             $table->string('country', 2)->default('FR')->after('postal_code');
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->softDeletes()->after('updated_at');
 
             // Indexes
+            $table->index('is_company');
             $table->index('is_active');
             $table->index('deleted_at');
         });
@@ -33,12 +35,13 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'phone', 'company_name', 'company_siret',
+                'phone', 'company_name', 'company_siret', 'is_company',
                 'address', 'city', 'postal_code', 'country',
                 'locale', 'timezone', 'avatar', 'is_active',
                 'last_login_at'
             ]);
             $table->dropSoftDeletes();
+            $table->dropIndex(['is_company']);
             $table->dropIndex(['is_active']);
             $table->dropIndex(['deleted_at']);
         });

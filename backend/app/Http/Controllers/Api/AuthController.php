@@ -26,7 +26,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
-            'siret' => 'nullable|string|max:14',
+            'company_siret' => 'nullable|string|max:14',
             'is_company' => 'boolean',
         ]);
 
@@ -36,7 +36,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'] ?? null,
             'company_name' => $validated['company_name'] ?? null,
-            'siret' => $validated['siret'] ?? null,
+            'company_siret' => $validated['company_siret'] ?? null,
             'is_company' => $validated['is_company'] ?? false,
             'locale' => 'fr',
             'timezone' => 'Europe/Paris',
@@ -156,7 +156,7 @@ class AuthController extends Controller
             'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
-            'siret' => 'nullable|string|max:14',
+            'company_siret' => 'nullable|string|max:14',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:10',

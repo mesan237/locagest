@@ -28,7 +28,7 @@ class UpdateProfileRequest extends FormRequest
             'email' => "sometimes|email|max:255|unique:users,email,{$userId}",
             'phone' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
-            'siret' => 'nullable|string|max:14|regex:/^[0-9]{14}$/',
+            'company_siret' => 'nullable|string|max:14|regex:/^[0-9]{14}$/',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:10',
@@ -49,7 +49,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'email.email' => 'L\'email doit être une adresse email valide.',
             'email.unique' => 'Cet email est déjà utilisé.',
-            'siret.regex' => 'Le SIRET doit contenir exactement 14 chiffres.',
+            'company_siret.regex' => 'Le SIRET doit contenir exactement 14 chiffres.',
             'country.size' => 'Le code pays doit contenir exactement 2 caractères.',
             'locale.in' => 'La langue doit être "fr" ou "en".',
         ];

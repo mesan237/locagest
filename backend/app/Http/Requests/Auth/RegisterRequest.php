@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
-            'siret' => 'nullable|string|max:14|regex:/^[0-9]{14}$/',
+            'company_siret' => 'nullable|string|max:14|regex:/^[0-9]{14}$/',
             'is_company' => 'boolean',
         ];
     }
@@ -47,7 +47,7 @@ class RegisterRequest extends FormRequest
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
-            'siret.regex' => 'Le SIRET doit contenir exactement 14 chiffres.',
+            'company_siret.regex' => 'Le SIRET doit contenir exactement 14 chiffres.',
         ];
     }
 }

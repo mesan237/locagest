@@ -11,7 +11,7 @@ class Property extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'owner_id',
+        'user_id',
         'reference',
         'name',
         'type',
@@ -30,46 +30,37 @@ class Property extends Model
         'floor',
         'total_floors',
         'construction_year',
-        'acquisition_date',
-        'acquisition_price',
-        'current_value',
-        'tax_value',
-        'dpe_rating',
+        'energy_rating',
         'ges_rating',
-        'dpe_value',
-        'ges_value',
-        'heating_type',
-        'has_parking',
         'has_elevator',
+        'has_parking',
         'has_balcony',
         'has_terrace',
         'has_garden',
-        'has_cellar',
-        'equipment',
+        'is_furnished',
         'description',
+        'equipment',
         'status',
-        'availability_date',
+        'acquisition_date',
+        'acquisition_price',
+        'estimated_value',
     ];
 
     protected function casts(): array
     {
         return [
             'acquisition_date' => 'date',
-            'availability_date' => 'date',
             'acquisition_price' => 'decimal:2',
-            'current_value' => 'decimal:2',
-            'tax_value' => 'decimal:2',
+            'estimated_value' => 'decimal:2',
             'surface_area' => 'decimal:2',
-            'dpe_value' => 'integer',
-            'ges_value' => 'integer',
-            'latitude' => 'decimal:8',
-            'longitude' => 'decimal:8',
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
             'has_parking' => 'boolean',
             'has_elevator' => 'boolean',
             'has_balcony' => 'boolean',
             'has_terrace' => 'boolean',
             'has_garden' => 'boolean',
-            'has_cellar' => 'boolean',
+            'is_furnished' => 'boolean',
             'equipment' => 'array',
         ];
     }
@@ -79,7 +70,7 @@ class Property extends Model
      */
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

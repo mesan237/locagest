@@ -11,21 +11,25 @@ class PropertyPhoto extends Model
 
     protected $fillable = [
         'property_id',
-        'file_name',
         'file_path',
+        'file_name',
         'file_size',
         'mime_type',
+        'width',
+        'height',
         'is_main',
-        'order',
+        'display_order',
         'caption',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_main' => 'boolean',
             'file_size' => 'integer',
-            'order' => 'integer',
+            'width' => 'integer',
+            'height' => 'integer',
+            'is_main' => 'boolean',
+            'display_order' => 'integer',
         ];
     }
 

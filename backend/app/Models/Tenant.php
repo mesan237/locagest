@@ -11,34 +11,34 @@ class Tenant extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'owner_id',
+        'user_id',
         'first_name',
         'last_name',
         'email',
         'phone',
-        'mobile',
-        'date_of_birth',
-        'place_of_birth',
+        'phone_secondary',
+        'birth_date',
+        'birth_place',
         'nationality',
         'id_card_type',
         'id_card_number',
-        'id_card_expiry',
+        'id_card_expiry_date',
         'profession',
         'employer',
         'monthly_income',
-        'previous_address',
         'emergency_contact_name',
         'emergency_contact_phone',
         'notes',
-        'status',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'date_of_birth' => 'date',
-            'id_card_expiry' => 'date',
+            'birth_date' => 'date',
+            'id_card_expiry_date' => 'date',
             'monthly_income' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -47,7 +47,7 @@ class Tenant extends Model
      */
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -87,7 +87,7 @@ class Tenant extends Model
      */
     public function getAgeAttribute(): ?int
     {
-        return $this->date_of_birth ? $this->date_of_birth->age : null;
+        return $this->birth_date ? $this->birth_date->age : null;
     }
 
     /**

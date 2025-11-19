@@ -4,18 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RentPayment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'rent_id',
-        'payment_date',
         'amount',
+        'payment_date',
         'payment_method',
-        'transaction_id',
+        'transaction_reference',
+        'bank_name',
         'receipt_number',
+        'receipt_generated_at',
         'notes',
         'created_by',
     ];
@@ -24,6 +27,7 @@ class RentPayment extends Model
     {
         return [
             'payment_date' => 'date',
+            'receipt_generated_at' => 'datetime',
             'amount' => 'decimal:2',
         ];
     }
