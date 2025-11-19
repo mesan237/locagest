@@ -322,13 +322,180 @@ morphTo('documentable')  // Peut appartenir à Property, Tenant, Lease, etc.
 ### Prochaines Étapes (Session 3)
 
 **Priorité 1 - Backend (Jour 1 fin) :**
-- [ ] Configurer Laravel Sanctum pour l'authentification API
-- [ ] Créer AuthController (register, login, logout, me, updateProfile)
-- [ ] Créer Form Requests pour validation Auth
-- [ ] Configurer les routes API dans `routes/api.php`
+- [x] Configurer Laravel Sanctum pour l'authentification API
+- [x] Créer AuthController (register, login, logout, me, updateProfile)
+- [x] Créer Form Requests pour validation Auth
+- [x] Configurer les routes API dans `routes/api.php`
 - [ ] Tester les endpoints avec Postman/Insomnia
 
 **Priorité 2 - Backend (Jour 2) :**
+- [ ] Créer DashboardController avec statistiques
+- [ ] Créer Seeders (PlanSeeder, UserSeeder, PropertySeeder, TenantSeeder)
+- [ ] Créer PropertyController (CRUD de base)
+
+---
+
+## Session 3 - 19 Novembre 2025 (Suite)
+
+### Objectif
+
+Configurer l'authentification complète avec Laravel Sanctum (Jour 1 - Tâches 3, 4, 5 du plan de développement).
+
+### État de Départ
+
+- ✅ 18 modèles créés avec relations
+- ✅ Code pushé sur GitHub (branche dev)
+- ⏳ Authentification API non configurée
+
+### Travail Effectué
+
+- [x] Configuration complète de Laravel Sanctum
+- [x] Configuration CORS pour l'API
+- [x] Création de l'AuthController avec 8 méthodes
+- [x] Création de 4 Form Requests de validation
+- [x] Configuration des routes API
+- [x] Mise à jour du bootstrap pour charger les routes API
+- [x] Documentation complète de l'API (API_AUTHENTICATION.md)
+
+#### Fichiers Créés (11 fichiers)
+
+**Configuration :**
+1. `backend/config/sanctum.php` - Configuration Sanctum avec domaines stateful
+2. `backend/config/cors.php` - Configuration CORS (localhost:5173, localhost:3000)
+
+**Controllers :**
+3. `backend/app/Http/Controllers/Api/AuthController.php` - 8 méthodes d'authentification
+
+**Form Requests :**
+4. `backend/app/Http/Requests/Auth/RegisterRequest.php` - Validation inscription
+5. `backend/app/Http/Requests/Auth/LoginRequest.php` - Validation connexion
+6. `backend/app/Http/Requests/Auth/UpdateProfileRequest.php` - Validation profil
+7. `backend/app/Http/Requests/Auth/UpdatePasswordRequest.php` - Validation mot de passe
+
+**Routes :**
+8. `backend/routes/api.php` - Routes API avec middleware Sanctum
+
+**Fichiers Modifiés :**
+9. `backend/bootstrap/app.php` - Ajout des routes API et middleware Sanctum
+
+**Documentation :**
+10. `docs/API_AUTHENTICATION.md` - Documentation complète de l'API d'authentification
+
+### Décisions Prises
+
+#### 1. AuthController - 8 Méthodes
+
+**Méthodes implémentées :**
+- `register()` - Inscription avec création de token
+- `login()` - Connexion avec révocation des anciens tokens
+- `logout()` - Déconnexion (révoque token actuel)
+- `logoutAll()` - Déconnexion de tous les appareils
+- `me()` - Récupère l'utilisateur avec subscription
+- `updateProfile()` - Mise à jour du profil
+- `updatePassword()` - Changement de mot de passe
+- `deleteAccount()` - Suppression du compte (soft delete)
+
+**Raison :** Couverture complète des besoins d'authentification
+
+#### 2. Form Requests avec Messages en Français
+
+**Validation séparée par action :**
+- RegisterRequest (inscription)
+- LoginRequest (connexion)
+- UpdateProfileRequest (profil)
+- UpdatePasswordRequest (mot de passe)
+
+**Messages personnalisés en français**
+
+**Raison :**
+- Meilleure organisation du code
+- Réutilisabilité
+- Messages clairs pour l'utilisateur final français
+
+#### 3. Configuration CORS Permissive (Développement)
+
+**Domaines autorisés :**
+- `http://localhost:5173` (Vite/React)
+- `http://localhost:3000` (React/Next.js)
+- `http://127.0.0.1:5173`
+- `http://127.0.0.1:3000`
+
+**Credentials supportés :** `true`
+
+**Raison :** Facilite le développement frontend/backend
+
+#### 4. Révocation des Tokens
+
+**Stratégies implémentées :**
+- Login : Tous les tokens révoqués (1 seule session active)
+- Logout : Token actuel uniquement
+- Logout All : Tous les tokens
+- Update Password : Tous sauf l'actuel
+- Delete Account : Tous les tokens
+
+**Raison :** Sécurité et contrôle des sessions
+
+#### 5. Documentation API Détaillée
+
+**Contenu :**
+- Description de chaque endpoint
+- Exemples de requêtes/réponses
+- Codes d'erreur
+- Exemples cURL et JavaScript
+- Bonnes pratiques de sécurité
+
+**Raison :** Facilite l'intégration frontend et la collaboration
+
+### Statistiques
+
+- **Controllers créés :** 1 (AuthController)
+- **Méthodes d'authentification :** 8
+- **Form Requests créés :** 4
+- **Fichiers de configuration :** 2 (sanctum.php, cors.php)
+- **Routes API définies :** 9 routes
+- **Lignes de code :** ~800 lignes
+- **Documentation :** 1 fichier (465 lignes)
+
+### Points Techniques
+
+#### Routes API Définies
+
+**Publiques (sans authentification) :**
+```
+POST /api/auth/register
+POST /api/auth/login
+```
+
+**Protégées (middleware auth:sanctum) :**
+```
+POST   /api/auth/logout
+POST   /api/auth/logout-all
+GET    /api/auth/me
+PUT    /api/auth/profile
+PUT    /api/auth/password
+DELETE /api/auth/account
+GET    /api/user (legacy)
+```
+
+#### Middleware Sanctum
+
+```php
+$middleware->api(prepend: [
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+]);
+```
+
+**Raison :** Gestion des requêtes SPA avec cookies stateful
+
+### Prochaines Étapes (Session 4)
+
+**À faire immédiatement :**
+- [ ] Tester tous les endpoints avec Postman/Insomnia
+- [ ] Créer une collection Postman
+- [ ] Vérifier que Sanctum fonctionne correctement
+- [ ] Commit et push du code d'authentification
+
+**Jour 2 - Backend :**
 - [ ] Créer DashboardController avec statistiques
 - [ ] Créer Seeders (PlanSeeder, UserSeeder, PropertySeeder, TenantSeeder)
 - [ ] Créer PropertyController (CRUD de base)
