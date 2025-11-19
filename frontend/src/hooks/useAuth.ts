@@ -36,12 +36,24 @@ export const useAuth = () => {
       queryClient.clear();
       navigate({ to: '/login' });
     },
+    onError: () => {
+      // Even if the API call fails, logout the user locally
+      logoutStore();
+      queryClient.clear();
+      navigate({ to: '/login' });
+    },
   });
 
   // Logout all mutation
   const logoutAllMutation = useMutation({
     mutationFn: () => authService.logoutAll(),
     onSuccess: () => {
+      logoutStore();
+      queryClient.clear();
+      navigate({ to: '/login' });
+    },
+    onError: () => {
+      // Even if the API call fails, logout the user locally
       logoutStore();
       queryClient.clear();
       navigate({ to: '/login' });
