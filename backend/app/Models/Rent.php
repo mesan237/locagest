@@ -13,14 +13,14 @@ class Rent extends Model
         'lease_id',
         'period_start',
         'period_end',
-        'due_date',
-        'amount',
-        'charges',
+        'rent_amount',
+        'charges_amount',
+        'other_amount',
         'total_amount',
         'paid_amount',
-        'balance',
+        'due_date',
         'status',
-        'payment_method',
+        'is_auto_generated',
         'notes',
     ];
 
@@ -30,11 +30,12 @@ class Rent extends Model
             'period_start' => 'date',
             'period_end' => 'date',
             'due_date' => 'date',
-            'amount' => 'decimal:2',
-            'charges' => 'decimal:2',
+            'rent_amount' => 'decimal:2',
+            'charges_amount' => 'decimal:2',
+            'other_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
             'paid_amount' => 'decimal:2',
-            'balance' => 'decimal:2',
+            'is_auto_generated' => 'boolean',
         ];
     }
 
@@ -59,7 +60,7 @@ class Rent extends Model
      */
     public function isPaid(): bool
     {
-        return $this->status === 'paid' && $this->balance <= 0;
+        return $this->status === 'paid';
     }
 
     /**

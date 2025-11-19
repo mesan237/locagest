@@ -11,21 +11,21 @@ class Document extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'user_id',
         'documentable_type',
         'documentable_id',
         'type',
+        'category',
         'name',
-        'description',
-        'file_name',
         'file_path',
+        'file_name',
         'file_size',
         'mime_type',
         'version',
         'is_signed',
-        'signed_at',
-        'signed_by',
-        'expires_at',
-        'uploaded_by',
+        'signed_date',
+        'expiry_date',
+        'is_archived',
     ];
 
     protected function casts(): array
@@ -34,8 +34,9 @@ class Document extends Model
             'file_size' => 'integer',
             'version' => 'integer',
             'is_signed' => 'boolean',
-            'signed_at' => 'datetime',
-            'expires_at' => 'date',
+            'signed_date' => 'date',
+            'expiry_date' => 'date',
+            'is_archived' => 'boolean',
         ];
     }
 
@@ -48,19 +49,11 @@ class Document extends Model
     }
 
     /**
-     * Get the user who uploaded the document.
+     * Get the user who owns the document.
      */
-    public function uploader()
+    public function owner()
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
-    }
-
-    /**
-     * Get the user who signed the document.
-     */
-    public function signer()
-    {
-        return $this->belongsTo(User::class, 'signed_by');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -76,7 +69,7 @@ class Document extends Model
      */
     public function isExpired(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return $this->expiry_date && $this->expiry_date->isPast();
     }
 
     /**
@@ -84,9 +77,9 @@ class Document extends Model
      */
     public function isExpiringSoon(): bool
     {
-        if (!$this->expires_at) {
+        if (!$this->expiry_date) {
             return false;
         }
-        return $this->expires_at->isFuture() && $this->expires_at->diffInDays(now()) <= 30;
+        return $this->expiry_date->isFuture() && $this->expiry_date->diffInDays(now()) <= 30;
     }
 }

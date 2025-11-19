@@ -14,24 +14,24 @@ class RentRevision extends Model
         'revision_date',
         'old_rent',
         'new_rent',
-        'irl_quarter',
-        'irl_year',
-        'old_irl_value',
-        'new_irl_value',
-        'calculation_formula',
+        'indexation_reference',
+        'base_index',
+        'new_index',
         'increase_percentage',
+        'calculation_formula',
+        'applied_from',
         'notes',
-        'applied_by',
     ];
 
     protected function casts(): array
     {
         return [
             'revision_date' => 'date',
+            'applied_from' => 'date',
             'old_rent' => 'decimal:2',
             'new_rent' => 'decimal:2',
-            'old_irl_value' => 'decimal:2',
-            'new_irl_value' => 'decimal:2',
+            'base_index' => 'decimal:4',
+            'new_index' => 'decimal:4',
             'increase_percentage' => 'decimal:2',
         ];
     }
@@ -44,11 +44,4 @@ class RentRevision extends Model
         return $this->belongsTo(Lease::class);
     }
 
-    /**
-     * Get the user who applied the revision.
-     */
-    public function appliedBy()
-    {
-        return $this->belongsTo(User::class, 'applied_by');
-    }
 }

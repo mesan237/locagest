@@ -14,14 +14,14 @@ class Utility extends Model
         'type',
         'period_start',
         'period_end',
-        'amount',
-        'included_in_charges',
-        'provider',
-        'meter_reading_start',
-        'meter_reading_end',
+        'previous_meter_reading',
+        'current_meter_reading',
         'consumption',
         'unit_price',
-        'notes',
+        'amount',
+        'invoice_reference',
+        'invoice_date',
+        'paid_by_tenant',
     ];
 
     protected function casts(): array
@@ -29,10 +29,13 @@ class Utility extends Model
         return [
             'period_start' => 'date',
             'period_end' => 'date',
-            'amount' => 'decimal:2',
-            'unit_price' => 'decimal:4',
+            'invoice_date' => 'date',
+            'previous_meter_reading' => 'decimal:2',
+            'current_meter_reading' => 'decimal:2',
             'consumption' => 'decimal:2',
-            'included_in_charges' => 'boolean',
+            'unit_price' => 'decimal:4',
+            'amount' => 'decimal:2',
+            'paid_by_tenant' => 'boolean',
         ];
     }
 

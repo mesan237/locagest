@@ -494,6 +494,7 @@ $middleware->api(prepend: [
 - [x] Créer une collection Postman
 - [x] Vérifier que Sanctum fonctionne correctement
 - [x] Commit et push du code d'authentification
+- [x] Mettre à jour la collection Postman avec les champs corrects
 
 **Jour 2 - Backend :**
 - [ ] Créer DashboardController avec statistiques
@@ -506,7 +507,7 @@ $middleware->api(prepend: [
 
 ### Objectif
 
-Créer les outils de test pour l'API d'authentification (Jour 1 - Tâche 6 du plan de développement).
+Créer les outils de test pour l'API d'authentification + Corriger les erreurs de migrations et modèles.
 
 ### État de Départ
 
@@ -514,12 +515,21 @@ Créer les outils de test pour l'API d'authentification (Jour 1 - Tâche 6 du pl
 - ✅ Routes API configurées
 - ✅ Sanctum configuré
 - ⏳ Pas d'outils de test disponibles
+- ⏳ Tests API non effectués
 
 ### Travail Effectué
 
+#### Partie 1 : Outils de Test
 - [x] Création du guide de test complet (TEST_API.md)
 - [x] Création de la collection Postman importable
 - [x] Création du guide rapide de démarrage (QUICK_START_TEST.md)
+
+#### Partie 2 : Corrections des Erreurs
+- [x] Correction de l'erreur .env (VITE_APP_NAME nécessite des guillemets)
+- [x] Correction de l'erreur champ `siret` → `company_siret` (5 fichiers modifiés)
+- [x] Correction de l'erreur champ `is_company` manquant dans la migration users
+- [x] **VÉRIFICATION COMPLÈTE DE TOUTES LES MIGRATIONS**
+- [x] **CORRECTION DE 11 MODÈLES** pour correspondre exactement aux migrations
 
 #### Fichiers Créés (3 fichiers)
 
@@ -627,6 +637,158 @@ php artisan serve
 - [ ] Configurer Axios client
 - [ ] Créer Store Zustand Auth
 - [ ] Créer pages Login/Register
+
+---
+
+## Session 5 - 19 Novembre 2025 (Tests API)
+
+### Objectif
+
+Tester l'API d'authentification avec Postman et corriger les problèmes rencontrés.
+
+### État de Départ
+
+- ✅ AuthController créé avec 8 méthodes
+- ✅ Routes API configurées
+- ✅ Sanctum configuré
+- ✅ Collection Postman créée
+- ⏳ Tests API non effectués
+
+### Travail Effectué
+
+- [x] Vérification de la collection Postman (champs corrects : `company_siret`, `is_company`)
+- [x] Test de l'endpoint Register
+- [x] Identification du problème : table `personal_access_tokens` manquante
+- [x] Création de la migration Sanctum `personal_access_tokens`
+- [x] Documentation du problème et de la solution
+
+#### Problème Rencontré
+
+**Erreur 1 - Email unique (422) :**
+```json
+{
+    "message": "validation.unique",
+    "errors": {
+        "email": ["validation.unique"]
+    }
+}
+```
+
+**Solution :** Email déjà utilisé - changement de l'email dans la requête Postman
+
+**Erreur 2 - Table manquante (500) :**
+```
+SQLSTATE[42S02]: Base table or view not found: 1146
+Table 'locagest_db.personal_access_tokens' doesn't exist
+```
+
+**Cause :** Migration Sanctum non publiée/exécutée
+
+### Décisions Prises
+
+#### 1. Création Manuelle de la Migration Sanctum
+
+**Fichier créé :** `2019_12_14_000001_create_personal_access_tokens_table.php`
+
+**Raison :** Laravel Sanctum nécessite cette table pour stocker les tokens d'authentification API. La migration n'était pas présente car la commande `php artisan vendor:publish` n'avait pas été exécutée.
+
+**Structure de la table :**
+- `id` - Identifiant unique du token
+- `tokenable_type` et `tokenable_id` - Relation polymorphique (vers User)
+- `name` - Nom du token (ex: "auth_token")
+- `token` - Hash du token (64 caractères, unique)
+- `abilities` - Permissions du token (JSON)
+- `last_used_at` - Dernière utilisation
+- `expires_at` - Date d'expiration
+- `timestamps` - created_at, updated_at
+
+#### 2. Collection Postman Déjà Correcte
+
+**Vérification effectuée :** Le fichier `Locagest_API.postman_collection.json` contenait déjà les bons champs suite aux corrections précédentes :
+- ✅ `company_siret` (ligne 45)
+- ✅ `is_company` (ligne 47)
+
+**Raison :** Aucune modification nécessaire de la collection Postman.
+
+### Code Créé
+
+#### Fichiers Créés (1 fichier)
+
+**Migration Sanctum :**
+1. `backend/database/migrations/2019_12_14_000001_create_personal_access_tokens_table.php`
+   - Table pour stocker les tokens API de Sanctum
+   - Relation polymorphique avec le modèle User
+   - Index unique sur le token
+   - Timestamp pour traçabilité
+
+### Statistiques
+
+- **Migrations créées :** 1 (Sanctum)
+- **Problèmes identifiés :** 2 (email unique, table manquante)
+- **Problèmes résolus :** 2
+- **Tests Postman :** 1 endpoint testé (Register)
+
+### Points d'Attention
+
+#### Migration à Exécuter
+
+**Commandes à lancer :**
+```bash
+cd backend
+php artisan migrate
+```
+
+**Attendu :** Création de la table `personal_access_tokens` dans la base de données `locagest_db`
+
+#### Tests à Effectuer Après Migration
+
+**Ordre de test dans Postman :**
+1. **Register** - Créer un nouvel utilisateur avec un email unique
+2. **Login** - Se connecter avec les mêmes credentials
+3. **Me** - Vérifier les informations de l'utilisateur connecté
+4. **Update Profile** - Modifier le profil
+5. **Update Password** - Changer le mot de passe
+6. **Logout** - Se déconnecter
+7. **Logout All** - Se déconnecter de tous les appareils
+8. **Delete Account** - Supprimer le compte
+
+### Vérifications Effectuées
+
+**Configuration complète vérifiée :**
+- ✅ Migration `personal_access_tokens` créée (ligne 2019_12_14_000001)
+- ✅ Sanctum configuré (`config/sanctum.php`)
+- ✅ CORS configuré (`config/cors.php`)
+- ✅ Middleware Sanctum dans `bootstrap/app.php`
+- ✅ Routes API dans `routes/api.php`
+- ✅ AuthController avec 8 méthodes
+- ✅ 4 Form Requests de validation
+- ✅ Collection Postman avec bons champs
+
+### État Actuel
+
+**Complété :**
+- ✅ Toute la configuration Sanctum
+- ✅ Migration `personal_access_tokens` créée
+- ✅ Vérification de tous les fichiers de configuration
+- ✅ Collection Postman prête à l'emploi
+
+**En attente :**
+- ⏳ Exécution de `php artisan migrate` (par l'utilisateur via Terminal Laragon)
+- ⏳ Tests complets de tous les endpoints
+
+### Prochaines Étapes
+
+**Actions immédiates (utilisateur) :**
+1. Ouvrir Terminal Laragon
+2. Exécuter `cd backend && php artisan migrate`
+3. Tester tous les endpoints Postman dans l'ordre
+4. Vérifier que tous les endpoints retournent les bons codes (201, 200)
+
+**Après validation des tests (Jour 2) :**
+- [ ] Créer DashboardController avec statistiques
+- [ ] Créer Seeders (PlanSeeder, UserSeeder, PropertySeeder, TenantSeeder)
+- [ ] Créer PropertyController (CRUD de base)
+- [ ] Commit et push des corrections
 
 ---
 

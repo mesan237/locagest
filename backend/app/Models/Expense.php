@@ -11,21 +11,24 @@ class Expense extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'owner_id',
+        'user_id',
         'property_id',
         'category',
-        'description',
+        'subcategory',
         'amount',
         'vat_amount',
         'total_amount',
-        'vat_rate',
+        'description',
         'expense_date',
+        'payment_date',
         'payment_method',
-        'supplier',
+        'supplier_name',
         'invoice_number',
         'invoice_path',
+        'receipt_path',
         'is_deductible',
-        'deductible_percentage',
+        'is_recoverable',
+        'recovered_amount',
         'notes',
     ];
 
@@ -33,12 +36,13 @@ class Expense extends Model
     {
         return [
             'expense_date' => 'date',
+            'payment_date' => 'date',
             'amount' => 'decimal:2',
             'vat_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
-            'vat_rate' => 'decimal:2',
-            'deductible_percentage' => 'decimal:2',
+            'recovered_amount' => 'decimal:2',
             'is_deductible' => 'boolean',
+            'is_recoverable' => 'boolean',
         ];
     }
 
@@ -47,7 +51,7 @@ class Expense extends Model
      */
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -59,13 +63,13 @@ class Expense extends Model
     }
 
     /**
-     * Calculate the deductible amount.
+     * Get the remaining recoverable amount.
      */
-    public function getDeductibleAmountAttribute(): float
+    public function getRemainingRecoverableAttribute(): float
     {
-        if (!$this->is_deductible) {
+        if (!$this->is_recoverable) {
             return 0;
         }
-        return $this->total_amount * ($this->deductible_percentage / 100);
+        return max(0, $this->total_amount - $this->recovered_amount);
     }
 }
