@@ -1,8 +1,10 @@
 import { useAuth } from '../../hooks/useAuth';
-import { Card, CardHeader, CardTitle, CardContent, Button } from '../../components/ui';
+import { useDashboard } from '../../hooks/useDashboard';
+import { Card, CardHeader, CardTitle, CardContent, Button, Spinner, Alert } from '../../components/ui';
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
+  const { stats, recentRents, upcomingRents, isLoading, isError, error } = useDashboard();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -39,37 +41,111 @@ export const Dashboard = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Propriétés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-blue-600">0</p>
-              <p className="text-sm text-gray-600 mt-2">Biens immobiliers</p>
-            </CardContent>
-          </Card>
+        {isLoading && (
+          <div className="flex justify-center py-12">
+            <Spinner size="lg" />
+          </div>
+        )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Locataires</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-600 mt-2">Locataires actifs</p>
-            </CardContent>
-          </Card>
+        {isError && (
+          <Alert variant="error" title="Erreur">
+            {error instanceof Error ? error.message : 'Impossible de charger les statistiques'}
+          </Alert>
+        )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenus du mois</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-purple-600">0 €</p>
-              <p className="text-sm text-gray-600 mt-2">Loyers encaissés</p>
-            </CardContent>
-          </Card>
-        </div>
+        {!isLoading && !isError && stats && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Propriétés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-blue-600">{stats.total_properties}</p>
+                  <p className="text-sm text-gray-600 mt-2">Biens immobiliers</p>
+                  <div className="mt-2 text-xs text-gray-500">
+                    {stats.rented_properties} louées · {stats.available_properties} disponibles
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Locataires</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-green-600">{stats.total_tenants}</p>
+                  <p className="text-sm text-gray-600 mt-2">Locataires actifs</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenus du mois</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-purple-600">
+                    {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.monthly_revenue)}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">Loyers encaissés</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Taux d'occupation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-orange-600">{stats.occupancy_rate}%</p>
+                  <p className="text-sm text-gray-600 mt-2">Occupation</p>
+                  {stats.pending_payments > 0 && (
+                    <div className="mt-2 text-xs text-red-600">
+                      {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.pending_payments)} en attente
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {upcomingRents.length > 0 && (
+              <div className="mt-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Loyers à venir (30 prochains jours)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Propriété</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Locataire</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Échéance</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {upcomingRents.map((rent) => (
+                            <tr key={rent.id}>
+                              <td className="px-4 py-3 text-sm text-gray-900">{rent.property_name}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{rent.tenant_name}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">
+                                {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(rent.amount)}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-900">
+                                {new Date(rent.due_date).toLocaleDateString('fr-FR')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </>
+        )}
 
         <div className="mt-8">
           <Card>
