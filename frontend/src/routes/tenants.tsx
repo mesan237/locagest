@@ -1,8 +1,7 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
-import { TenantsPage } from '../pages/tenants/TenantsPage';
+import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/tenants')({
-  component: TenantsPage,
+  component: () => <Outlet />,
   beforeLoad: ({ context }) => {
     if (!context.isAuthenticated) {
       throw redirect({
