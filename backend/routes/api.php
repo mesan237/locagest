@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -59,11 +61,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Dashboard Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Property Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('properties', PropertyController::class);
+
+    /*
+    |--------------------------------------------------------------------------
     | Future API Routes
     |--------------------------------------------------------------------------
     | Add your other API routes here:
-    | - Dashboard
-    | - Properties
     | - Tenants
     | - Leases
     | - Rents

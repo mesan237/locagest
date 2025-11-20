@@ -1297,10 +1297,80 @@ const logoutMutation = useMutation({
 - [ ] Implémenter CRUD Properties
 
 **Backend Jour 2 :**
-- [ ] DashboardController avec stats
-- [ ] Seeders (Plan, User, Property, Tenant)
-- [ ] PropertyController CRUD
+- [x] DashboardController avec stats
+- [x] Seeders (Plan, User, Property, Tenant)
+- [x] PropertyController CRUD
 - [ ] Upload de photos
+
+---
+
+## Session 8 - 19 Novembre 2025 (Jour 2 - Dashboard & Properties)
+
+### Objectif
+
+Implémenter le Jour 2 du plan de développement : Dashboard avec statistiques réelles et CRUD Properties.
+
+### État de Départ
+
+- ✅ Frontend Jour 1 complété (Session 6)
+- ✅ Erreurs router et logout fixées (Session 7)
+- ⏳ Aucune statistique backend
+- ⏳ Pas de seeders pour les données de test
+- ⏳ Pas de CRUD Properties
+
+### Travail Effectué
+
+#### Backend - 3 composants majeurs
+
+**1. DashboardController** - Statistiques complètes
+- Total propriétés / louées / disponibles
+- Locataires actifs
+- Revenus mensuels et paiements en attente
+- Taux d'occupation calculé
+- 5 derniers loyers + 10 prochains (30j)
+
+**2. Seeders (4 fichiers)** - Données de test réalistes
+- **PlanSeeder** : 4 plans (Gratuit → Enterprise)
+- **UserSeeder** : 15+ utilisateurs (bailleurs/locataires)
+- **PropertySeeder** : 15-20 propriétés variées
+- **TenantSeeder** : 30-40 locataires
+
+**3. PropertyController** - CRUD complet
+- index() : Liste + filtres + pagination
+- store() : Création + ref auto
+- show() : Détails + photos + baux
+- update() : Modification
+- destroy() : Soft delete + vérification
+
+#### Frontend - Dashboard dynamique
+
+**1. Services & Hooks**
+- dashboardService : API client typé
+- useDashboard : React Query (auto-refresh 60s)
+
+**2. Dashboard Page**
+- 4 cartes statistiques en temps réel
+- Tableau loyers à venir (30j)
+- Loading + Error states
+- Formatage FR (€, dates)
+
+### Statistiques
+
+- **Backend** : ~800 lignes (2 controllers, 4 seeders)
+- **Frontend** : ~170 lignes (1 service, 1 hook, 1 page)
+- **Total** : ~970 lignes
+- **Commit** : a061551 (+1012, -39)
+
+### Résumé Jour 2
+
+| Tâche | Status |
+|-------|--------|
+| Backend Dashboard | ✅ Complété |
+| Backend Seeders | ✅ Complété |
+| Backend Properties CRUD | ✅ Complété |
+| Frontend Dashboard | ✅ Complété |
+
+**Jour 2 : 100% complété ! 🎉**
 
 ---
 
