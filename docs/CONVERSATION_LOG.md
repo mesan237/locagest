@@ -2138,11 +2138,347 @@ Implémenter le module Tenants complet (Jour 4 du plan) - Backend + Frontend ave
 - [ ] Créer routes API Leases
 
 **Frontend Developer :**
-- [ ] Créer PropertyForm (création/édition avec photos)
-- [ ] Créer PropertyDetails page
-- [ ] Créer TenantForm (création/édition)
-- [ ] Créer TenantDetails page
-- [ ] Créer composants réutilisables (StatusBadge, Avatar, etc.)
+- [x] Créer PropertyForm (création/édition avec photos)
+- [x] Créer PropertyDetails page
+- [x] Créer TenantForm (création/édition)
+- [x] Créer TenantDetails page
+- [x] Créer composants réutilisables (StatusBadge, Avatar, etc.)
+
+---
+
+## Session 12 - 20 Novembre 2025 (Completion Jour 3-4)
+
+### Objectif
+
+Compléter les formulaires de création/édition et pages de détails manquants pour les modules Properties et Tenants selon le plan de développement.
+
+### État de Départ
+
+- ✅ Jour 1-2 : Authentication et Dashboard complétés
+- ✅ Jour 3 : PropertiesPage (liste) créée
+- ✅ Jour 4 : TenantsPage (liste) créée
+- ❌ Formulaires Properties (création/édition) manquants
+- ❌ Page PropertyDetails manquante
+- ❌ Formulaires Tenants (création/édition) manquants
+- ❌ Page TenantDetails manquante
+- ❌ Routes imbriquées non configurées
+
+### Travail Effectué
+
+#### Partie 1 : Module Properties - Formulaires et Détails
+
+**Composants Créés :**
+
+1. **PhotoUploader.tsx** (195 lignes)
+   - Composant drag & drop pour upload photos
+   - Validation type fichier (images seulement)
+   - Validation taille (max 5MB)
+   - Preview en grille avec boutons suppression
+   - Limite de 10 photos par bien
+
+2. **PropertyForm.tsx** (441 lignes)
+   - Formulaire complet avec 8 sections
+   - 38+ champs : informations de base, adresse, caractéristiques, équipements, DPE, finances, GPS
+   - Validation complète des données
+   - Support création et édition
+   - Messages d'erreur en français
+
+3. **PropertyDetails.tsx** (338 lignes)
+   - Affichage complet des informations du bien
+   - Galerie photos avec gestion (upload/delete/set main)
+   - Mutations React Query pour photos
+   - Boutons Modifier et Supprimer
+   - Badges de statut (disponible, loué, maintenance, réservé)
+
+**Pages CRUD Properties :**
+
+4. **CreateProperty.tsx** (42 lignes)
+   - Wrapper pour PropertyForm
+   - Mutation création avec cache invalidation
+   - Navigation automatique vers détails après succès
+
+5. **EditProperty.tsx** (75 lignes)
+   - Chargement données existantes
+   - Pre-fill PropertyForm
+   - Mutation update avec cache invalidation
+
+#### Partie 2 : Module Tenants - Formulaires et Détails
+
+**Composants Créés :**
+
+6. **DocumentUpload.tsx** (127 lignes)
+   - Upload pièces d'identité (recto/verso)
+   - Support images et PDF (max 5MB)
+   - Preview images, icône pour PDF
+   - Validation type et taille
+
+7. **TenantForm.tsx** (242 lignes)
+   - Formulaire complet avec 4 sections
+   - 17+ champs : personnel, pièce d'identité, professionnel, notes
+   - Upload documents ID card front/back
+   - Validation dates et format
+   - Support création et édition
+
+8. **TenantDetails.tsx** (265 lignes)
+   - Avatar avec initiales et couleur générée
+   - Affichage informations complètes
+   - Documents pièce d'identité si uploadés
+   - Badges statut (actif/inactif)
+   - Section historique des baux
+
+**Pages CRUD Tenants :**
+
+9. **CreateTenant.tsx** (42 lignes)
+   - Wrapper pour TenantForm
+   - Mutation création
+   - Navigation vers détails après succès
+
+10. **EditTenant.tsx** (69 lignes)
+    - Chargement données tenant
+    - Pre-fill TenantForm
+    - Mutation update
+
+#### Partie 3 : Configuration Routes et Navigation
+
+**Routes Créées/Modifiées :**
+
+11. **properties.tsx** - Modifié pour utiliser `<Outlet />`
+12. **properties.index.tsx** - Route index pour PropertiesPage
+13. **properties.new.tsx** - Route création bien
+14. **properties.$id.tsx** - Route détails bien
+15. **properties.$id.edit.tsx** - Route édition bien
+16. **tenants.tsx** - Modifié pour utiliser `<Outlet />`
+17. **tenants.index.tsx** - Route index pour TenantsPage
+18. **tenants.new.tsx** - Route création locataire
+19. **tenants.$id.tsx** - Route détails locataire
+20. **tenants.$id.edit.tsx** - Route édition locataire
+
+**Layout Créé :**
+
+21. **AppLayout.tsx** (65 lignes)
+    - Layout commun avec header navigation
+    - Links Dashboard, Propriétés, Locataires
+    - Affichage utilisateur + nom entreprise
+    - Bouton déconnexion
+    - Container max-width et padding cohérents
+
+#### Partie 4 : Corrections Backend
+
+**TenantController.php - Corrections API :**
+- Ligne 110 : `'tenant' => $tenant` → `'data' => $tenant` (méthode store)
+- Ligne 136-138 : Retour direct `$tenant` → `['data' => $tenant]` (méthode show)
+- Ligne 190-192 : `'tenant' => $tenant` → `'data' => $tenant` (méthode update)
+
+### Décisions Prises
+
+#### 1. Architecture Routes TanStack Router
+**Problème :** Routes enfants ne s'affichaient pas (`/properties/new`, `/tenants/new`)
+
+**Solution adoptée :**
+- Routes parentes utilisent `<Outlet />` au lieu de composant direct
+- Routes `.index.tsx` affichent le composant de liste au niveau parent
+- Routes enfants (`.new`, `.$id`, `.$id.edit`) s'affichent dans l'Outlet
+
+**Raison :** Pattern recommandé par TanStack Router pour nested routes
+
+#### 2. Structure Réponses API Backend
+**Problème :** Frontend attendait `response.data.data` mais backend retournait structures incohérentes
+
+**Solution adoptée :**
+- Toutes les réponses wrappent les données dans `data` property
+- Structure unifiée : `{ message: string, data: T }`
+- Cohérence avec PropertyController déjà existant
+
+**Raison :** Consistance API, éviter erreurs "Query data cannot be undefined"
+
+#### 3. AppLayout pour Navigation Cohérente
+**Problème :** Formulaires n'affichaient pas le header/navigation
+
+**Solution adoptée :**
+- Créer composant AppLayout réutilisable
+- Wrapper TOUTES les pages CRUD avec AppLayout
+- Header fixe avec navigation accessible partout
+
+**Raison :** UX cohérente, navigation toujours accessible
+
+#### 4. Gestion Photos/Documents
+**Problème :** Upload de fichiers nécessite UI intuitive
+
+**Solution adoptée :**
+- PhotoUploader avec drag & drop pour biens immobiliers
+- DocumentUpload avec preview pour pièces d'identité
+- Validation côté client (type, taille) avant upload
+
+**Raison :** UX moderne, feedback immédiat à l'utilisateur
+
+### Code Modifié
+
+#### Frontend - Composants Créés (10 fichiers)
+- `frontend/src/components/features/properties/PhotoUploader.tsx`
+- `frontend/src/components/features/properties/PropertyForm.tsx`
+- `frontend/src/components/features/tenants/DocumentUpload.tsx`
+- `frontend/src/components/features/tenants/TenantForm.tsx`
+- `frontend/src/components/layout/AppLayout.tsx`
+- `frontend/src/pages/properties/PropertyDetails.tsx`
+- `frontend/src/pages/properties/CreateProperty.tsx`
+- `frontend/src/pages/properties/EditProperty.tsx`
+- `frontend/src/pages/tenants/TenantDetails.tsx`
+- `frontend/src/pages/tenants/CreateTenant.tsx`
+- `frontend/src/pages/tenants/EditTenant.tsx`
+
+#### Frontend - Routes Créées/Modifiées (10 fichiers)
+- `frontend/src/routes/properties.tsx` - Ajout Outlet pattern
+- `frontend/src/routes/properties.index.tsx` - Nouveau
+- `frontend/src/routes/properties.new.tsx` - Nouveau
+- `frontend/src/routes/properties.$id.tsx` - Nouveau
+- `frontend/src/routes/properties.$id.edit.tsx` - Nouveau
+- `frontend/src/routes/tenants.tsx` - Ajout Outlet pattern
+- `frontend/src/routes/tenants.index.tsx` - Nouveau
+- `frontend/src/routes/tenants.new.tsx` - Nouveau
+- `frontend/src/routes/tenants.$id.tsx` - Nouveau
+- `frontend/src/routes/tenants.$id.edit.tsx` - Nouveau
+
+#### Backend - Corrections (1 fichier)
+- `backend/app/Http/Controllers/Api/TenantController.php`
+  - Méthode `store()` : Retour unifié avec `data` property
+  - Méthode `show()` : Wrapping réponse dans `data` property
+  - Méthode `update()` : Retour unifié avec `data` property
+
+### Problèmes Résolus
+
+#### 1. Routes enfants invisibles
+**Symptôme :** Clic sur "Nouveau locataire" change URL mais page blanche
+
+**Cause :** Routes parentes rendaient composant direct au lieu d'Outlet
+
+**Solution :** Refactorisation architecture routes avec pattern Outlet
+
+**Fichiers modifiés :**
+- `properties.tsx`, `tenants.tsx` - Ajout Outlet
+- Création routes `.index.tsx` pour composants listes
+
+#### 2. Erreur "Query data cannot be undefined"
+**Symptôme :** React Query erreur lors du chargement détails locataire
+
+**Cause :** Backend retournait `$tenant` directement, frontend attendait `response.data.data`
+
+**Solution :** Wrapping backend dans `['data' => $tenant]`
+
+**Fichiers modifiés :**
+- `TenantController.php` - Méthodes store, show, update
+
+#### 3. Imports TypeScript avec verbatimModuleSyntax
+**Symptôme :** Erreurs import "PropertyFormData not found"
+
+**Solution :**
+- Utiliser `import type` pour types
+- Ajouter extension `.js` aux imports
+- Créer fichier re-export `types.ts`
+
+**Fichiers modifiés :**
+- Tous les composants forms et pages
+
+#### 4. Navigation manquante dans formulaires
+**Symptôme :** Pas de header/navigation dans pages création/édition
+
+**Solution :** Création et application AppLayout sur toutes pages CRUD
+
+**Fichiers modifiés :**
+- 6 pages CRUD wrappées dans AppLayout
+
+### Patterns Techniques Implémentés
+
+#### React Query
+```typescript
+// Cache invalidation après mutations
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: ['properties'] });
+  queryClient.invalidateQueries({ queryKey: ['property', id] });
+}
+```
+
+#### TanStack Router Navigation
+```typescript
+// Navigation type-safe avec params
+navigate({
+  to: '/properties/$id',
+  params: { id: response.property.id.toString() }
+});
+```
+
+#### TypeScript Strict Mode
+```typescript
+// Import types avec extension .js
+import type { PropertyFormData } from '../../../types.js';
+```
+
+#### React Query Error Handling
+```typescript
+const { data: tenant, isLoading, error } = useQuery({
+  queryKey: ['tenant', id],
+  queryFn: () => tenantService.getTenant(Number(id)),
+});
+```
+
+### Statistiques
+
+**Lignes de code ajoutées :** ~2,500 lignes
+**Fichiers créés :** 21 fichiers
+**Fichiers modifiés :** 3 fichiers
+**Composants React :** 11 composants
+**Routes TanStack :** 10 routes
+**Backend corrections :** 3 méthodes
+
+### Tests à Effectuer
+
+- [ ] Créer un bien avec photos
+- [ ] Modifier un bien existant
+- [ ] Supprimer un bien
+- [ ] Définir photo principale
+- [ ] Créer un locataire avec documents ID
+- [ ] Modifier un locataire existant
+- [ ] Supprimer un locataire
+- [ ] Vérifier navigation header sur toutes les pages
+- [ ] Vérifier logout depuis n'importe quelle page
+- [ ] Tester formulaires avec données invalides
+
+### Commits
+
+À créer dans l'ordre :
+
+1. **feat: create Properties CRUD forms and details pages** (Frontend Properties)
+   - PhotoUploader, PropertyForm, PropertyDetails
+   - CreateProperty, EditProperty pages
+   - Routes properties.new, properties.$id, properties.$id.edit
+
+2. **feat: create Tenants CRUD forms and details pages** (Frontend Tenants)
+   - DocumentUpload, TenantForm, TenantDetails
+   - CreateTenant, EditTenant pages
+   - Routes tenants.new, tenants.$id, tenants.$id.edit
+
+3. **feat: add AppLayout with navigation header** (Layout)
+   - AppLayout component
+   - Wrap all CRUD pages with consistent navigation
+
+4. **fix: correct API response structure in TenantController** (Backend)
+   - Wrap responses in 'data' property for consistency
+   - Fixes "Query data cannot be undefined" error
+
+### Prochaines Étapes (Jour 5 - Baux partie 1)
+
+**Backend Developer :**
+- [ ] Créer LeaseController CRUD
+- [ ] Créer Form Requests Lease (Store/Update)
+- [ ] Créer LeaseResource avec relations
+- [ ] Implémenter calcul révisions loyer IRL
+- [ ] Créer routes API Leases
+
+**Frontend Developer :**
+- [ ] Créer LeaseForm (création bail avec sélection propriété/locataire)
+- [ ] Créer LeaseDetails page avec calendrier paiements
+- [ ] Créer composant RentCalendar
+- [ ] Intégrer gestion révisions loyer IRL
+- [ ] Tester workflow complet Properties → Tenants → Leases
 
 ---
 
