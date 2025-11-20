@@ -232,7 +232,7 @@ export const TenantsPage = () => {
                         {getStatusBadge(tenant.is_active)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link to={`/tenants/${tenant.id}`}>
+                        <Link to="/tenants/$id" params={{ id: tenant.id.toString() }}>
                           <Button variant="ghost" size="sm" className="mr-2">
                             Voir
                           </Button>

@@ -43,7 +43,9 @@ export const PropertiesPage = () => {
               {pagination ? `${pagination.total} bien(s) immobilier(s)` : 'Chargement...'}
             </p>
           </div>
-          <Button>+ Ajouter une propriété</Button>
+          <Link to="/properties/new">
+            <Button>+ Ajouter une propriété</Button>
+          </Link>
         </div>
 
         {/* Filters */}
@@ -105,7 +107,9 @@ export const PropertiesPage = () => {
                 <CardContent>
                   <div className="text-center py-12">
                     <p className="text-gray-600 mb-4">Aucune propriété trouvée</p>
-                    <Button>Créer votre première propriété</Button>
+                    <Link to="/properties/new">
+                      <Button>Créer votre première propriété</Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -153,9 +157,11 @@ export const PropertiesPage = () => {
                         {property.rooms && <span>{property.rooms} pièces</span>}
                         {property.bedrooms && <span>{property.bedrooms} chambres</span>}
                       </div>
-                      <Button variant="primary" fullWidth size="sm">
-                        Voir détails
-                      </Button>
+                      <Link to="/properties/$id" params={{ id: property.id.toString() }}>
+                        <Button variant="primary" fullWidth size="sm">
+                          Voir détails
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 ))}
