@@ -11,7 +11,9 @@ export const useDashboard = () => {
   } = useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: () => dashboardService.getStats(),
-    refetchInterval: 60000, // Refetch every 60 seconds
+    retry: 3, // Retry only 3 times on failure
+    retryDelay: 1000, // Wait 1 second between retries
+    refetchInterval: false, // Disable auto-refresh for now
     staleTime: 30000, // Consider data stale after 30 seconds
   });
 

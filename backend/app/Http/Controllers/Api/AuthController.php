@@ -48,7 +48,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User registered successfully',
             'user' => $user,
-            'access_token' => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
         ], 201);
     }
@@ -86,7 +86,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,
-            'access_token' => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
         ]);
     }
@@ -133,12 +133,12 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        // Load relationships
-        $user->load(['subscription.plan']);
+        // Load relationships if they exist
+        if (method_exists($user, 'subscription')) {
+            $user->load(['subscription.plan']);
+        }
 
-        return response()->json([
-            'user' => $user,
-        ]);
+        return response()->json($user);
     }
 
     /**

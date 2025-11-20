@@ -5,11 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Property;
 use App\Models\Tenant;
-use App\Models\Lease;
-use App\Models\Rent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -30,97 +26,40 @@ class DashboardController extends Controller
             ], 403);
         }
 
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
         // Total properties count
         $totalProperties = Property::where('user_id', $userId)->count();
 
-        // Rented properties count
+        // Rented properties count (based on property status for now, since we don't have leases yet)
         $rentedProperties = Property::where('user_id', $userId)
-            ->whereHas('leases', function ($query) {
-                $query->where('status', 'active');
-            })
+            ->where('status', 'rented')
             ->count();
 
         // Available properties count
-        $availableProperties = $totalProperties - $rentedProperties;
+        $availableProperties = Property::where('user_id', $userId)
+            ->where('status', 'available')
+            ->count();
 
         // Total active tenants
         $activeTenants = Tenant::where('user_id', $userId)
             ->where('is_active', true)
             ->count();
 
-        // Monthly revenue (paid rents for current month)
-        $monthlyRevenue = Rent::whereHas('lease', function ($query) use ($userId) {
-                $query->whereHas('property', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                });
-            })
-            ->whereMonth('period_start', $currentMonth)
-            ->whereYear('period_start', $currentYear)
-            ->where('status', 'paid')
-            ->sum('total_amount');
+        // Monthly revenue (0 for now since we don't have rents data yet)
+        $monthlyRevenue = 0;
 
-        // Pending payments for current month
-        $pendingPayments = Rent::whereHas('lease', function ($query) use ($userId) {
-                $query->whereHas('property', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                });
-            })
-            ->whereMonth('period_start', $currentMonth)
-            ->whereYear('period_start', $currentYear)
-            ->whereIn('status', ['pending', 'late'])
-            ->sum('total_amount');
+        // Pending payments (0 for now since we don't have rents data yet)
+        $pendingPayments = 0;
 
         // Occupancy rate
         $occupancyRate = $totalProperties > 0
             ? round(($rentedProperties / $totalProperties) * 100, 2)
             : 0;
 
-        // Recent rents (last 5)
-        $recentRents = Rent::with(['lease.property', 'lease.tenant'])
-            ->whereHas('lease', function ($query) use ($userId) {
-                $query->whereHas('property', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get()
-            ->map(function ($rent) {
-                return [
-                    'id' => $rent->id,
-                    'property_name' => $rent->lease->property->name,
-                    'tenant_name' => $rent->lease->tenant->first_name . ' ' . $rent->lease->tenant->last_name,
-                    'amount' => $rent->total_amount,
-                    'status' => $rent->status,
-                    'due_date' => $rent->due_date,
-                    'paid_date' => $rent->paid_date,
-                ];
-            });
+        // Recent rents (empty for now since we don't have rents data yet)
+        $recentRents = [];
 
-        // Upcoming rents (next 30 days)
-        $upcomingRents = Rent::with(['lease.property', 'lease.tenant'])
-            ->whereHas('lease', function ($query) use ($userId) {
-                $query->whereHas('property', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                });
-            })
-            ->where('status', 'pending')
-            ->whereBetween('due_date', [Carbon::now(), Carbon::now()->addDays(30)])
-            ->orderBy('due_date', 'asc')
-            ->limit(10)
-            ->get()
-            ->map(function ($rent) {
-                return [
-                    'id' => $rent->id,
-                    'property_name' => $rent->lease->property->name,
-                    'tenant_name' => $rent->lease->tenant->first_name . ' ' . $rent->lease->tenant->last_name,
-                    'amount' => $rent->total_amount,
-                    'due_date' => $rent->due_date,
-                ];
-            });
+        // Upcoming rents (empty for now since we don't have rents data yet)
+        $upcomingRents = [];
 
         return response()->json([
             'stats' => [
