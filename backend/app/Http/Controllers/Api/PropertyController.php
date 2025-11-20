@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Property;
+use App\Models\PropertyPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Intervention\Image\Laravel\Facades\Image;
 
 class PropertyController extends Controller
 {
@@ -261,6 +264,179 @@ class PropertyController extends Controller
 
         return response()->json([
             'message' => 'Propriété supprimée avec succès'
+        ]);
+    }
+
+    /**
+     * Upload photos for a property
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadPhotos(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $property = Property::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$property) {
+            return response()->json([
+                'message' => 'Propriété non trouvée'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'photos' => 'required|array|min:1|max:10',
+            'photos.*' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120', // 5MB max
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $uploadedPhotos = [];
+        $existingPhotosCount = $property->photos()->count();
+
+        foreach ($request->file('photos') as $index => $photo) {
+            // Generate unique filename
+            $filename = 'property_' . $property->id . '_' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+
+            // Store original image
+            $path = $photo->storeAs('properties/' . $property->id, $filename, 'public');
+
+            // Get image dimensions
+            $imageResource = Image::read($photo->getRealPath());
+            $width = $imageResource->width();
+            $height = $imageResource->height();
+
+            // Create photo record
+            $propertyPhoto = PropertyPhoto::create([
+                'property_id' => $property->id,
+                'file_path' => $path,
+                'file_name' => $filename,
+                'file_size' => $photo->getSize(),
+                'mime_type' => $photo->getMimeType(),
+                'width' => $width,
+                'height' => $height,
+                'display_order' => $existingPhotosCount + $index + 1,
+                'is_main' => $existingPhotosCount === 0 && $index === 0, // First photo is main if no photos exist
+            ]);
+
+            $uploadedPhotos[] = $propertyPhoto;
+        }
+
+        return response()->json([
+            'message' => count($uploadedPhotos) . ' photo(s) uploadée(s) avec succès',
+            'photos' => $uploadedPhotos,
+            'property' => $property->load('photos')
+        ], 201);
+    }
+
+    /**
+     * Delete a photo
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $propertyId
+     * @param  int  $photoId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deletePhoto(Request $request, $propertyId, $photoId)
+    {
+        $user = $request->user();
+
+        $property = Property::where('id', $propertyId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$property) {
+            return response()->json([
+                'message' => 'Propriété non trouvée'
+            ], 404);
+        }
+
+        $photo = PropertyPhoto::where('id', $photoId)
+            ->where('property_id', $propertyId)
+            ->first();
+
+        if (!$photo) {
+            return response()->json([
+                'message' => 'Photo non trouvée'
+            ], 404);
+        }
+
+        // Delete file from storage
+        if (Storage::disk('public')->exists($photo->file_path)) {
+            Storage::disk('public')->delete($photo->file_path);
+        }
+
+        $wasMain = $photo->is_main;
+        $photo->delete();
+
+        // If deleted photo was main, set the first remaining photo as main
+        if ($wasMain) {
+            $firstPhoto = PropertyPhoto::where('property_id', $propertyId)
+                ->orderBy('display_order')
+                ->first();
+
+            if ($firstPhoto) {
+                $firstPhoto->update(['is_main' => true]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Photo supprimée avec succès',
+            'property' => $property->load('photos')
+        ]);
+    }
+
+    /**
+     * Set main photo for a property
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $propertyId
+     * @param  int  $photoId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setMainPhoto(Request $request, $propertyId, $photoId)
+    {
+        $user = $request->user();
+
+        $property = Property::where('id', $propertyId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$property) {
+            return response()->json([
+                'message' => 'Propriété non trouvée'
+            ], 404);
+        }
+
+        $photo = PropertyPhoto::where('id', $photoId)
+            ->where('property_id', $propertyId)
+            ->first();
+
+        if (!$photo) {
+            return response()->json([
+                'message' => 'Photo non trouvée'
+            ], 404);
+        }
+
+        // Remove is_main from all photos of this property
+        PropertyPhoto::where('property_id', $propertyId)
+            ->update(['is_main' => false]);
+
+        // Set this photo as main
+        $photo->update(['is_main' => true]);
+
+        return response()->json([
+            'message' => 'Photo principale définie avec succès',
+            'property' => $property->load('photos')
         ]);
     }
 }

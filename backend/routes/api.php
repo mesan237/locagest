@@ -73,6 +73,11 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::apiResource('properties', PropertyController::class);
 
+    // Property Photos Routes
+    Route::post('/properties/{property}/photos', [PropertyController::class, 'uploadPhotos'])->name('properties.photos.upload');
+    Route::delete('/properties/{property}/photos/{photo}', [PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
+    Route::put('/properties/{property}/photos/{photo}/main', [PropertyController::class, 'setMainPhoto'])->name('properties.photos.set-main');
+
     /*
     |--------------------------------------------------------------------------
     | Future API Routes

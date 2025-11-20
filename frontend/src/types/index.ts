@@ -24,21 +24,64 @@ export interface User {
 
 export interface Property {
   id: number;
+  reference: string;
   name: string;
-  type: 'apartment' | 'house' | 'commercial' | 'parking';
+  type: 'apartment' | 'house' | 'commercial' | 'parking' | 'land' | 'office';
+  type_label: string;
+  status: 'available' | 'rented' | 'maintenance' | 'reserved';
+  status_label: string;
+
+  // Address
   address: string;
+  address_complement?: string;
   city: string;
   postal_code: string;
+  country: string;
+  full_address: string;
+
+  // Specifications
   surface_area: number;
-  rooms: number;
-  bedrooms: number;
-  bathrooms: number;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  floor?: number;
+  construction_year?: number;
+
+  // Description
   description?: string;
-  monthly_rent: number;
-  charges: number;
-  deposit: number;
-  status: 'available' | 'rented' | 'maintenance';
+  features?: string[];
+  equipment?: string[];
+
+  // Amenities
+  is_furnished: boolean;
+  has_parking: boolean;
+  has_elevator: boolean;
+  has_balcony: boolean;
+  has_terrace: boolean;
+  has_garden: boolean;
+  has_garage: boolean;
+  has_cellar: boolean;
+
+  // Energy
+  energy_rating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  ges_rating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  energy_consumption?: number;
+  ges_emission?: number;
+
+  // Financial
+  estimated_value?: number;
+
+  // Location
+  latitude?: number;
+  longitude?: number;
+  cadastral_reference?: string;
+
+  // Relationships
   photos?: PropertyPhoto[];
+  main_photo?: PropertyPhoto;
+  leases_count?: number;
+
+  // Timestamps
   created_at: string;
   updated_at: string;
 }
@@ -46,9 +89,66 @@ export interface Property {
 export interface PropertyPhoto {
   id: number;
   property_id: number;
-  url: string;
+  file_name: string;
+  file_path: string;
+  file_url: string;
+  file_size: number;
+  file_size_human: string;
+  mime_type: string;
+  width: number;
+  height: number;
+  display_order: number;
   is_main: boolean;
+  caption?: string;
   created_at: string;
+  updated_at: string;
+}
+
+export interface PropertyFormData {
+  name: string;
+  type: 'apartment' | 'house' | 'commercial' | 'parking' | 'land' | 'office';
+  address: string;
+  address_complement?: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  surface_area: number;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  floor?: number;
+  construction_year?: number;
+  description?: string;
+  features?: string[];
+  equipment?: string[];
+  status?: 'available' | 'rented' | 'maintenance' | 'reserved';
+  is_furnished?: boolean;
+  has_parking?: boolean;
+  has_elevator?: boolean;
+  has_balcony?: boolean;
+  has_terrace?: boolean;
+  has_garden?: boolean;
+  has_garage?: boolean;
+  has_cellar?: boolean;
+  energy_rating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  ges_rating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  energy_consumption?: number;
+  ges_emission?: number;
+  estimated_value?: number;
+  latitude?: number;
+  longitude?: number;
+  cadastral_reference?: string;
+}
+
+export interface PropertyFilters {
+  status?: string;
+  type?: string;
+  city?: string;
+  search?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  per_page?: number;
+  page?: number;
 }
 
 export interface Tenant {
