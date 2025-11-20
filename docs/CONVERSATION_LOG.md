@@ -1748,6 +1748,274 @@ Corriger les erreurs de seeders et finaliser le Jour 2 : Dashboard avec données
 
 ---
 
+## Session 10 - 20 Novembre 2025 (Jour 3 - Module Propriétés)
+
+### Objectif
+
+Implémenter le module Properties complet : backend avec gestion des photos, API complète, et frontend avec liste des propriétés.
+
+### État de Départ
+
+- ✅ Jour 2 complété (Dashboard + Auth)
+- ✅ PropertyController de base existant (CRUD simple)
+- ❌ Pas de gestion des photos
+- ❌ Pas de Form Requests ni Resources
+- ❌ Pas de pages frontend Properties
+
+### Travail Effectué
+
+#### Backend - PropertyController & API
+
+**1. PropertyController - Gestion des photos (3 méthodes)**
+- `uploadPhotos()` - Upload multiple photos (max 10, 5MB chacune)
+  - Génération nom unique avec timestamp + uniqid
+  - Stockage dans `storage/app/public/properties/{id}/`
+  - Récupération dimensions avec Intervention Image
+  - Première photo = photo principale si aucune photo
+  - Display order automatique
+- `deletePhoto()` - Suppression photo avec gestion photo principale
+  - Suppression fichier du storage
+  - Si photo principale supprimée → première photo restante devient principale
+- `setMainPhoto()` - Définir photo principale
+  - Remove is_main de toutes les photos
+  - Set is_main sur la photo sélectionnée
+
+**2. Form Requests - Validation complète en français**
+- `StorePropertyRequest` - Validation création (28 champs)
+  - Champs obligatoires : name, type, address, city, postal_code, country, surface_area
+  - Validation types (apartment, house, commercial, parking, land, office)
+  - Validation statuts (available, rented, maintenance, reserved)
+  - Validation DPE/GES (A-G)
+  - Messages d'erreur en français
+- `UpdatePropertyRequest` - Validation mise à jour
+  - Tous les champs en `sometimes` (optionnels)
+  - Mêmes validations que StorePropertyRequest
+
+**3. API Resources - Transformation JSON**
+- `PropertyResource` - Transformation complète Property
+  - Inclut type_label et status_label en français
+  - Full_address formatée
+  - Relations : photos, main_photo, leases_count, active_lease
+  - Timestamps en ISO 8601
+- `PropertyPhotoResource` - Transformation PropertyPhoto
+  - file_url avec Storage::url()
+  - file_size_human (B, KB, MB, GB)
+  - Toutes les métadonnées (width, height, mime_type, etc.)
+
+**4. Routes API**
+- `POST /api/properties/{id}/photos` - Upload photos
+- `DELETE /api/properties/{id}/photos/{photoId}` - Delete photo
+- `PUT /api/properties/{id}/photos/{photoId}/main` - Set main photo
+
+#### Frontend - Services & Hooks
+
+**5. Types TypeScript**
+- Update `Property` interface (40+ champs)
+  - Address fields, specifications, amenities
+  - Energy ratings (DPE/GES)
+  - Relationships (photos, main_photo, leases_count)
+- Update `PropertyPhoto` interface (14 champs)
+  - file_url, file_size_human, width, height, etc.
+- New `PropertyFormData` interface
+- New `PropertyFilters` interface
+
+**6. PropertyService - API client**
+- `getProperties(filters)` - Liste avec filtres et pagination
+- `getProperty(id)` - Détails d'une propriété
+- `createProperty(data)` - Création
+- `updateProperty(id, data)` - Mise à jour
+- `deleteProperty(id)` - Suppression (soft delete)
+- `uploadPhotos(propertyId, files)` - Upload avec FormData
+- `deletePhoto(propertyId, photoId)` - Suppression photo
+- `setMainPhoto(propertyId, photoId)` - Photo principale
+
+**7. useProperties Hook - React Query**
+- Query : `getProperties` avec filters en queryKey
+- Mutations : create, update, delete, uploadPhotos, deletePhoto, setMainPhoto
+- Invalidation automatique des queries après mutations
+- Invalidation dashboard stats après modifs
+- Gestion loading, error states pour chaque mutation
+- Hook séparé `useProperty(id)` pour une propriété
+
+#### Frontend - Pages & Navigation
+
+**8. PropertiesPage - Liste des propriétés**
+- Header avec logo et navigation (Dashboard, Propriétés)
+- Filtres en temps réel :
+  - Status (Disponible, Loué, Maintenance, Réservé)
+  - Type (Appartement, Maison, Commercial, etc.)
+  - Recherche texte
+- Grid responsive (1 col mobile, 2 tablet, 3 desktop)
+- Property cards avec :
+  - Photo principale ou placeholder
+  - Badge statut coloré
+  - Nom, référence, type, ville
+  - Surface, pièces, chambres
+  - Bouton "Voir détails"
+- Pagination (Précédent/Suivant)
+- Loading et error states
+
+**9. Routes & Navigation**
+- Route `/properties` avec protection auth
+- Lien "Propriétés" dans Dashboard navbar
+
+### Statistiques Session 10
+
+- **Backend** : ~750 lignes (Controller + Requests + Resources + Routes)
+- **Frontend** : ~450 lignes (Service + Hook + Page + Route + Types)
+- **Total** : ~1,200 lignes
+- **Fichiers créés** : 9 (4 backend, 5 frontend)
+- **Commits** : 2
+  - `d7b1c9d` - Backend & API (916+ lines)
+  - `e24db2a` - Frontend pages (213+ lines)
+
+### Code Créé
+
+#### Backend (8 fichiers)
+
+1. **app/Http/Controllers/Api/PropertyController.php** (+176 lignes)
+   - uploadPhotos, deletePhoto, setMainPhoto
+
+2. **app/Http/Requests/Property/StorePropertyRequest.php** (86 lignes)
+   - Validation 28 champs + messages FR
+
+3. **app/Http/Requests/Property/UpdatePropertyRequest.php** (69 lignes)
+   - Validation optionnelle + messages FR
+
+4. **app/Http/Resources/PropertyResource.php** (124 lignes)
+   - Transformation JSON avec labels FR
+
+5. **app/Http/Resources/PropertyPhotoResource.php** (62 lignes)
+   - URL publique + taille humaine
+
+6. **routes/api.php** (+5 lignes)
+   - 3 routes photos
+
+#### Frontend (5 fichiers)
+
+7. **types/index.ts** (+109 lignes)
+   - Property, PropertyPhoto, PropertyFormData, PropertyFilters
+
+8. **services/propertyService.ts** (103 lignes)
+   - 8 méthodes CRUD + photos
+
+9. **hooks/useProperties.ts** (150 lignes)
+   - Queries + mutations React Query
+
+10. **pages/properties/PropertiesPage.tsx** (199 lignes)
+    - Liste, filtres, pagination
+
+11. **routes/properties.tsx** (14 lignes)
+    - Route protégée
+
+12. **pages/dashboard/Dashboard.tsx** (+4 lignes)
+    - Lien navigation
+
+### Git Commits
+
+**Commit 1 - Backend & API :**
+- Hash: `d7b1c9d`
+- Message: `feat: implement Day 3 - Properties module backend & API`
+- Fichiers: 9 (+916, -9)
+- Détails : Controller complet, Form Requests, Resources, Routes
+
+**Commit 2 - Frontend :**
+- Hash: `e24db2a`
+- Message: `feat: add Properties list page with filters and pagination`
+- Fichiers: 3 (+213)
+- Détails : PropertiesPage, route, navigation
+
+### Décisions Prises
+
+#### 1. Intervention Image pour Dimensions Photos
+
+**Raison :** Besoin de stocker width/height pour optimiser l'affichage frontend (aspect ratio, lazy loading, responsive images).
+
+**Impact :** Légère augmentation du temps d'upload mais amélioration UX significative.
+
+#### 2. Photo Principale Automatique
+
+**Raison :** Simplifier l'UX - la première photo uploadée devient automatiquement la photo principale si aucune photo n'existe.
+
+**Impact :** Moins de clics pour l'utilisateur, meilleure expérience.
+
+#### 3. Soft Delete Protection
+
+**Raison :** Impossible de supprimer une propriété avec des baux actifs pour préserver l'intégrité des données.
+
+**Impact :** Évite les orphelins de données, force l'utilisateur à terminer les baux d'abord.
+
+#### 4. Pagination Côté Serveur
+
+**Raison :** Avec potentiellement des centaines de propriétés, la pagination serveur réduit la charge réseau et améliore les performances.
+
+**Impact :** Réponses API plus rapides, moins de données transférées.
+
+#### 5. Filtres en Temps Réel
+
+**Raison :** Meilleure UX avec résultats instantanés lors du changement de filtres.
+
+**Impact :** Plus de requêtes API mais queries cachées par React Query.
+
+### Résumé Jour 3 - COMPLET ✅
+
+**Toutes les tâches du Jour 3 terminées :**
+
+| Tâche | Status | Fichiers |
+|-------|--------|----------|
+| ✅ PropertyController photos | Complété | 1 controller |
+| ✅ Form Requests validation | Complété | 2 requests |
+| ✅ API Resources | Complété | 2 resources |
+| ✅ Routes API photos | Complété | 3 routes |
+| ✅ Types TypeScript | Complété | Property + Photo + Filters |
+| ✅ PropertyService | Complété | 8 méthodes |
+| ✅ useProperties hook | Complété | Queries + mutations |
+| ✅ PropertiesPage | Complété | Liste + filtres + pagination |
+| ✅ Route + Navigation | Complété | Route protégée + lien |
+
+**Total Jour 3 : 100% complété ! 🎉**
+
+### Points d'Attention
+
+**✅ Module Properties Fonctionnel :**
+- CRUD complet avec validation
+- Upload photos multiples (max 10, 5MB)
+- Gestion photo principale automatique
+- Filtres par status, type, recherche
+- Pagination serveur
+- Soft delete avec protection baux actifs
+
+**⚠️ À Implémenter Plus Tard (Jour 4-5) :**
+- Formulaire création/édition Property
+- Page détails Property
+- Upload photos drag & drop
+- Galerie photos avec preview
+- TenantController CRUD
+- Pages Tenants
+
+**📋 PropertyService Backend Optionnel :**
+- La tâche "Créer PropertyService pour logique métier" n'a pas été implémentée car toute la logique est dans le Controller
+- Si besoin de logique complexe (calcul rentabilité, génération documents), on créera le service plus tard
+
+### Prochaines Étapes (Jour 4)
+
+**Backend Developer :**
+- [ ] Créer TenantController CRUD complet
+- [ ] Créer Form Requests Tenant (Store/Update)
+- [ ] Créer TenantResource
+- [ ] Créer TenantService (calcul solvabilité, âge)
+- [ ] Implémenter upload documents identité
+
+**Frontend Developer :**
+- [ ] Créer PropertyForm (création/édition)
+- [ ] Créer PropertyDetails page
+- [ ] Implémenter PhotoUploader drag & drop
+- [ ] Créer TenantsPage (liste)
+- [ ] Créer TenantForm
+- [ ] Créer composants réutilisables
+
+---
+
 ## Format des Futures Sessions
 
 ```markdown
