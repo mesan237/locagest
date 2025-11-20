@@ -20,7 +20,7 @@ class PropertyFactory extends Factory
         $type = fake()->randomElement($types);
 
         return [
-            'reference' => 'REF-' . date('Y') . '-' . fake()->unique()->numberBetween(1000, 9999),
+            'reference' => 'REF-' . date('Y') . '-' . strtoupper(substr(uniqid(), -6)),
             'name' => $this->generatePropertyName($type),
             'type' => $type,
             'address' => fake()->streetAddress(),
