@@ -17,8 +17,8 @@ class PlanSeeder extends Seeder
                 'name' => 'Gratuit',
                 'slug' => 'free',
                 'description' => 'Plan gratuit pour débuter',
-                'price' => 0.00,
-                'billing_period' => 'monthly',
+                'price_monthly' => 0.00,
+                'price_yearly' => 0.00,
                 'max_properties' => 1,
                 'max_tenants' => 1,
                 'max_documents' => 10,
@@ -30,14 +30,14 @@ class PlanSeeder extends Seeder
                     'Support par email',
                 ]),
                 'is_active' => true,
-                'is_popular' => false,
+                'display_order' => 1,
             ],
             [
                 'name' => 'Starter',
                 'slug' => 'starter',
                 'description' => 'Idéal pour les petits bailleurs',
-                'price' => 9.99,
-                'billing_period' => 'monthly',
+                'price_monthly' => 9.99,
+                'price_yearly' => 99.00, // -17% si paiement annuel
                 'max_properties' => 5,
                 'max_tenants' => 10,
                 'max_documents' => 100,
@@ -51,14 +51,14 @@ class PlanSeeder extends Seeder
                     'Export PDF',
                 ]),
                 'is_active' => true,
-                'is_popular' => false,
+                'display_order' => 2,
             ],
             [
                 'name' => 'Pro',
                 'slug' => 'pro',
                 'description' => 'Pour les bailleurs professionnels',
-                'price' => 29.99,
-                'billing_period' => 'monthly',
+                'price_monthly' => 29.99,
+                'price_yearly' => 299.00, // -17% si paiement annuel
                 'max_properties' => 20,
                 'max_tenants' => 50,
                 'max_documents' => 500,
@@ -75,14 +75,14 @@ class PlanSeeder extends Seeder
                     'Statistiques avancées',
                 ]),
                 'is_active' => true,
-                'is_popular' => true,
+                'display_order' => 3,
             ],
             [
                 'name' => 'Enterprise',
                 'slug' => 'enterprise',
                 'description' => 'Pour les grandes agences',
-                'price' => 99.99,
-                'billing_period' => 'monthly',
+                'price_monthly' => 99.99,
+                'price_yearly' => 999.00, // -17% si paiement annuel
                 'max_properties' => null, // Illimité
                 'max_tenants' => null,    // Illimité
                 'max_documents' => null,  // Illimité
@@ -100,7 +100,7 @@ class PlanSeeder extends Seeder
                     'Formation personnalisée',
                 ]),
                 'is_active' => true,
-                'is_popular' => false,
+                'display_order' => 4,
             ],
         ];
 
