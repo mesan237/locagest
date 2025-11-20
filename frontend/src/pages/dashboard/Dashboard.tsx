@@ -1,6 +1,7 @@
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboard } from '../../hooks/useDashboard';
 import { Card, CardHeader, CardTitle, CardContent, Button, Spinner, Alert } from '../../components/ui';
+import { Link } from '@tanstack/react-router';
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -15,6 +16,11 @@ export const Dashboard = () => {
               <h1 className="text-2xl font-bold text-blue-600">Locagest Pro</h1>
             </div>
             <div className="flex items-center gap-4">
+              <Link to="/properties">
+                <Button variant="ghost" size="sm">
+                  Propriétés
+                </Button>
+              </Link>
               <span className="text-sm text-gray-700">
                 {user?.name}
                 {user?.is_company && user?.company_name && (
