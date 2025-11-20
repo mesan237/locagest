@@ -107,7 +107,7 @@ class TenantController extends Controller
 
         return response()->json([
             'message' => 'Locataire créé avec succès',
-            'tenant' => $tenant
+            'data' => $tenant
         ], 201);
     }
 
@@ -133,7 +133,9 @@ class TenantController extends Controller
             ], 404);
         }
 
-        return response()->json($tenant);
+        return response()->json([
+            'data' => $tenant
+        ]);
     }
 
     /**
@@ -187,7 +189,7 @@ class TenantController extends Controller
 
         return response()->json([
             'message' => 'Locataire mis à jour avec succès',
-            'tenant' => $tenant
+            'data' => $tenant
         ]);
     }
 
