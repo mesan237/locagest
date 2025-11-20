@@ -19,7 +19,7 @@ class TenantFactory extends Factory
         return [
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
-            'email' => fake()->optional(0.8)->unique()->safeEmail(),
+            'email' => fake()->unique()->optional(0.8)->safeEmail(),
             'phone' => fake()->optional(0.9)->phoneNumber(),
             'phone_secondary' => fake()->optional(0.3)->phoneNumber(),
             'birth_date' => fake()->optional(0.7)->dateTimeBetween('-65 years', '-18 years'),
