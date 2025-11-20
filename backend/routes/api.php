@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PropertyController;
+use App\Http\Controllers\Api\TenantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -80,10 +81,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('tenants', TenantController::class);
+
+    /*
+    |--------------------------------------------------------------------------
     | Future API Routes
     |--------------------------------------------------------------------------
     | Add your other API routes here:
-    | - Tenants
     | - Leases
     | - Rents
     | - Expenses
