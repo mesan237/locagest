@@ -91,7 +91,10 @@ export const useAuth = () => {
     queryKey: ['user'],
     queryFn: () => authService.me(),
     enabled: isAuthenticated && !!token,
-    retry: false,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   return {

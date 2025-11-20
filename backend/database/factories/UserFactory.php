@@ -29,6 +29,14 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'phone' => fake()->phoneNumber(),
+            'address' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'postal_code' => fake()->postcode(),
+            'country' => 'FR',
+            'locale' => 'fr',
+            'timezone' => 'Europe/Paris',
+            'is_active' => true,
         ];
     }
 
@@ -39,6 +47,30 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a landlord (company).
+     */
+    public function landlord(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_company' => true,
+            'company_name' => fake()->company(),
+            'company_siret' => fake()->numerify('##############'),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a tenant (individual).
+     */
+    public function tenant(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_company' => false,
+            'company_name' => null,
+            'company_siret' => null,
         ]);
     }
 }

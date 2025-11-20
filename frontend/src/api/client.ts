@@ -34,6 +34,23 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('auth_token');
       window.location.href = '/login';
     }
+
+    // Handle Laravel validation errors (422)
+    if (error.response?.status === 422) {
+      const validationErrors = error.response.data?.errors;
+      if (validationErrors) {
+        // Extract first error message from Laravel validation errors
+        const firstErrorKey = Object.keys(validationErrors)[0];
+        const firstErrorMessage = validationErrors[firstErrorKey]?.[0];
+        if (firstErrorMessage) {
+          error.message = firstErrorMessage;
+        }
+      } else if (error.response.data?.message) {
+        // Use the message field if available
+        error.message = error.response.data.message;
+      }
+    }
+
     return Promise.reject(error);
   }
 );
