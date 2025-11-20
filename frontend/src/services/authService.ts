@@ -49,9 +49,20 @@ export interface MessageResponse {
 
 class AuthService {
   /**
+   * Get CSRF cookie from Laravel Sanctum
+   */
+  private async getCsrfCookie(): Promise<void> {
+    const baseURL = apiClient.defaults.baseURL?.replace('/api', '') || 'http://localhost:8000';
+    await apiClient.get(`${baseURL}/sanctum/csrf-cookie`);
+  }
+
+  /**
    * Register a new user
    */
   async register(data: RegisterData): Promise<AuthResponse> {
+    // Get CSRF cookie first
+    await this.getCsrfCookie();
+
     const response = await apiClient.post<AuthResponse>('/auth/register', data);
     return response.data;
   }
@@ -60,6 +71,9 @@ class AuthService {
    * Login user
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    // Get CSRF cookie first
+    await this.getCsrfCookie();
+
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
     return response.data;
   }
