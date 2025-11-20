@@ -1997,22 +1997,152 @@ Implémenter le module Properties complet : backend avec gestion des photos, API
 - La tâche "Créer PropertyService pour logique métier" n'a pas été implémentée car toute la logique est dans le Controller
 - Si besoin de logique complexe (calcul rentabilité, génération documents), on créera le service plus tard
 
-### Prochaines Étapes (Jour 4)
+---
+
+## Session 11 - 20 Novembre 2025
+
+### Objectif
+
+Implémenter le module Tenants complet (Jour 4 du plan) - Backend + Frontend avec filtres, recherche et pagination.
+
+### État de Départ
+
+- Day 3 (Properties) terminé avec 2 commits
+- Backend: PropertyController avec photos, Form Requests, Resources
+- Frontend: PropertiesPage avec filtres et navigation
+- Database déjà migrée avec table `tenants`
+
+### Travail Effectué
+
+**Backend :**
+- [x] Créer TenantController CRUD complet avec filtres
+- [x] Créer Form Requests Tenant (Store/Update) avec validation française
+- [x] Créer TenantResource avec computed properties
+- [x] Ajouter routes API Tenants
+
+**Frontend :**
+- [x] Créer types TypeScript Tenant (25+ champs)
+- [x] Créer tenantService pour API calls
+- [x] Créer hook useTenants avec React Query
+- [x] Créer TenantsPage avec liste et filtres
+- [x] Créer route Tenants et navigation
+- [x] Fix: Corriger import apiClient path
+
+### Décisions Prises
+
+1. **Soft delete avec protection**: Les locataires avec baux actifs ne peuvent pas être supprimés
+2. **Computed properties**: `full_name`, `age` calculés côté backend
+3. **Filtres avancés**: Recherche multi-champs (nom, email, téléphone) + filtre is_active
+4. **UI Table layout**: Préféré à un grid pour afficher plus d'informations (profession, employeur, revenu)
+5. **Avatar avec initiales**: Identité visuelle rapide sans photos
+6. **Pagination serveur**: 15 locataires par page pour performance
+
+### Code Modifié
+
+#### Backend (Commit: c16933d)
+
+**app/Http/Controllers/Api/TenantController.php** (238 lignes créées)
+- `index()`: Liste avec filtres `is_active`, `search`, `sort_by`, pagination
+- `store()`: Création avec validation 17 champs
+- `show()`: Détails avec relation leases.property
+- `update()`: Mise à jour partielle avec unique email
+- `destroy()`: Soft delete avec protection leases actifs
+
+**app/Http/Requests/Tenant/StoreTenantRequest.php** (82 lignes)
+- Required: first_name, last_name, email, phone, birth_date, nationality
+- Validation: email unique, birth_date before today, id_card_type in enum
+- Messages français personnalisés
+
+**app/Http/Requests/Tenant/UpdateTenantRequest.php** (69 lignes)
+- Tous champs optionnels (sometimes)
+- Unique email excluant tenant actuel
+- Même validation que Store
+
+**app/Http/Resources/TenantResource.php** (72 lignes)
+- Computed: `full_name`, `age` (via Carbon)
+- Labels français: id_card_type_label (Carte d'identité, Passeport, Titre de séjour)
+- Conditional: `active_lease` si relation loaded
+
+**routes/api.php** (+5 lignes)
+- `Route::apiResource('tenants', TenantController::class)` sous middleware auth:sanctum
+
+#### Frontend (Commit: 21396d1)
+
+**frontend/src/types/index.ts** (+67 lignes)
+- Interface `Tenant` avec 25+ champs (personal, ID card, professional, status)
+- Interface `TenantFormData` pour création/édition
+- Interface `TenantFilters` pour filtrage liste
+
+**frontend/src/services/tenantService.ts** (88 lignes créées)
+- `getTenants()`: Avec query params (is_active, search, sort, pagination)
+- `getTenant()`: Single tenant
+- `createTenant()`, `updateTenant()`, `deleteTenant()`
+
+**frontend/src/hooks/useTenants.ts** (106 lignes créées)
+- `useTenants()`: Query + 3 mutations avec cache invalidation
+- `useTenant()`: Query single avec enabled flag
+- States: isLoading, isCreating, isUpdating, isDeleting
+- Stale time: 30s, GC time: 5min
+
+**frontend/src/pages/tenants/TenantsPage.tsx** (305 lignes créées)
+- Table responsive avec 6 colonnes
+- Filtres: Status select, Search input
+- Pagination: Previous/Next buttons avec info
+- Avatar initials avec background coloré
+- Delete confirmation dialog
+- French formatting: currency (EUR), dates (fr-FR)
+- Status badges: vert (actif), gris (inactif)
+
+**frontend/src/routes/tenants.tsx** (14 lignes créées)
+- Route `/tenants` avec auth protection via beforeLoad
+- Redirect vers `/login` si non authentifié
+
+**frontend/src/pages/dashboard/Dashboard.tsx** (+4 lignes)
+- Lien navigation "Locataires" dans header
+
+#### Fix (Commit: 3c41244)
+
+**frontend/src/services/tenantService.ts** (1 ligne modifiée)
+- Fix: `import { apiClient } from '../api/client'` (était `'./apiClient'`)
+- Alignement avec propertyService.ts
+
+### Points Techniques
+
+**Backend:**
+- Soft delete: `SoftDeletes` trait sur Tenant model
+- Eager loading: `with('leases.property')` pour show()
+- Scopes: Filtrage `whereHas`, `orWhere` pour search
+- Authorization: `is_company` check dans Form Requests
+- French validation: Messages personnalisés pour UX française
+
+**Frontend:**
+- React Query: Cache management automatique
+- TypeScript: Types stricts pour sécurité
+- Conditional rendering: Loading, error, empty states
+- Performance: Pagination serveur-side
+- A11y: Labels for/id, semantic HTML
+
+### Commits
+
+1. **c16933d** - feat: implement Day 4 - Tenants module backend (Backend complet)
+2. **21396d1** - feat: implement complete Tenants frontend module (Frontend complet)
+3. **3c41244** - fix: correct apiClient import path in tenantService (Bug fix)
+
+### Prochaines Étapes (Jour 5 - Baux partie 1)
 
 **Backend Developer :**
-- [ ] Créer TenantController CRUD complet
-- [ ] Créer Form Requests Tenant (Store/Update)
-- [ ] Créer TenantResource
-- [ ] Créer TenantService (calcul solvabilité, âge)
-- [ ] Implémenter upload documents identité
+- [ ] Créer LeaseController CRUD
+- [ ] Créer Form Requests Lease (Store/Update)
+- [ ] Créer LeaseResource avec relations
+- [ ] Implémenter calcul révisions loyer IRL
+- [ ] Créer routes API Leases
 
 **Frontend Developer :**
-- [ ] Créer PropertyForm (création/édition)
+- [ ] Créer PropertyForm (création/édition avec photos)
 - [ ] Créer PropertyDetails page
-- [ ] Implémenter PhotoUploader drag & drop
-- [ ] Créer TenantsPage (liste)
-- [ ] Créer TenantForm
-- [ ] Créer composants réutilisables
+- [ ] Créer TenantForm (création/édition)
+- [ ] Créer TenantDetails page
+- [ ] Créer composants réutilisables (StatusBadge, Avatar, etc.)
 
 ---
 
