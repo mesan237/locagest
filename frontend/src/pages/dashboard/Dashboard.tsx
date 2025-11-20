@@ -21,6 +21,11 @@ export const Dashboard = () => {
                   Propriétés
                 </Button>
               </Link>
+              <Link to="/tenants">
+                <Button variant="ghost" size="sm">
+                  Locataires
+                </Button>
+              </Link>
               <span className="text-sm text-gray-700">
                 {user?.name}
                 {user?.is_company && user?.company_name && (

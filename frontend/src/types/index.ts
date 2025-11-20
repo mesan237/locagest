@@ -155,15 +155,68 @@ export interface Tenant {
   id: number;
   first_name: string;
   last_name: string;
+  full_name: string;
   email: string;
   phone: string;
+  phone_secondary?: string;
+
+  // Personal Information
   birth_date: string;
+  birth_place?: string;
+  age?: number;
   nationality: string;
+
+  // ID Card
   id_card_number?: string;
+  id_card_type?: 'id_card' | 'passport' | 'residence_permit';
+  id_card_type_label?: string;
+  id_card_expiry_date?: string;
+  id_card_front_path?: string;
+  id_card_back_path?: string;
+
+  // Professional Information
   profession?: string;
-  current_lease_id?: number;
+  employer?: string;
+  monthly_income?: number;
+
+  // Status
+  is_active: boolean;
+  notes?: string;
+
+  // Relationships
+  leases_count?: number;
+
+  // Timestamps
   created_at: string;
   updated_at: string;
+}
+
+export interface TenantFormData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  phone_secondary?: string;
+  birth_date: string;
+  birth_place?: string;
+  nationality: string;
+  id_card_number?: string;
+  id_card_type?: 'id_card' | 'passport' | 'residence_permit';
+  id_card_expiry_date?: string;
+  profession?: string;
+  employer?: string;
+  monthly_income?: number;
+  notes?: string;
+  is_active?: boolean;
+}
+
+export interface TenantFilters {
+  is_active?: boolean;
+  search?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  per_page?: number;
+  page?: number;
 }
 
 export interface Lease {
